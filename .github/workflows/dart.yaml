@@ -22,12 +22,12 @@ jobs:
       - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
 
-      - name: Print job info
-        run: dart bin/firehose.dart
-
       - name: Install dependencies
         run: dart pub get
   
+      - name: Print job info
+        run: dart bin/firehose.dart
+
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
