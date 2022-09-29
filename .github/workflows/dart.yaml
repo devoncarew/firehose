@@ -12,7 +12,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        sdk: [2.17.0, dev]
     steps:
       # These are the latest versions of the github actions; dependabot will
       # send PRs to keep these up-to-date.
