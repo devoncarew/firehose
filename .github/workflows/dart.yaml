@@ -31,5 +31,8 @@ jobs:
       - name: Analyze project source
         run: dart analyze --fatal-infos
 
+      - name: test git
+        run: git branch --show-current
+
       - name: Run tests
         run: dart test
