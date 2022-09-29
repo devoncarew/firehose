@@ -7,7 +7,7 @@ class Git {
   ///
   /// Returns null when run in a location not under source control.
   String? get currentBranch {
-    var branchName = Platform.environment['GITHUB_REF_NAME'];
+    var branchName = Platform.environment['GITHUB_HEAD_REF'];
     if (branchName != null) {
       return branchName;
     }
