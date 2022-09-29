@@ -11,6 +11,7 @@ void main() {
 
     test('currentBranch', () {
       var branch = git.currentBranch;
+      print('branch name: $branch');
       expect(branch, isNotNull);
     });
   });
