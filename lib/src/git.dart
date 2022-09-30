@@ -64,7 +64,7 @@ class Git {
       'git',
       args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],
     );
-    return result.stdout.split('\n');
+    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
   }
 
   List<String> getPRChangedFiles() {
@@ -73,7 +73,7 @@ class Git {
       'git',
       args: ['diff', baseRef!, headRef!, '--name-status'],
     );
-    return result.stdout.split('\n');
+    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
   }
 
   /// Return the name of the current branch.

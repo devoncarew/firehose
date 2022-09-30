@@ -39,7 +39,6 @@ void main(List<String> arguments) {
     print('  $file');
   }
 
-  print('');
   print('PR changed files:');
   for (var file in git.getPRChangedFiles()) {
     print('  $file');

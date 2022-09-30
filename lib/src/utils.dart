@@ -17,6 +17,9 @@ ExecResults exec(
   List<String> args = const [],
   Directory? cwd,
 }) {
+  // todo:
+  print('[$command ${args.join(', ')}]');
+
   var result = Process.runSync(command, args, workingDirectory: cwd?.path);
   return ExecResults(
     exitCode: result.exitCode,
