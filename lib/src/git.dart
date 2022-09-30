@@ -71,8 +71,11 @@ class Git {
     // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
     var result = exec(
       'git',
-      args: ['diff', baseRef!, headRef!, '--name-status'],
+      args: ['diff', '$baseRef!..$headRef!', '--name-status'],
     );
+    if (result.exitCode != 0) {
+      print('oops: ${result.stderr}');
+    }
     return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
   }
 
