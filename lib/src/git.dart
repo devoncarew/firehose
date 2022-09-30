@@ -15,6 +15,20 @@ import 'package:firehose/src/utils.dart';
 //   git.refName: main
 
 class Git {
+  /// Whether we're running withing the context of a GitHub action.
+  bool get inGithubContext {
+    var token = Platform.environment['GITHUB_ACTIONS'];
+    return token != null && token.isNotEmpty;
+  }
+
+  /// Whether we're being invoked in the context of a GitHub PR.
+  bool get onGithubPR {
+    return (baseRef?.isNotEmpty ?? false) && (headRef?.isNotEmpty ?? false);
+  }
+
+  // todo: get the commit count on the current branch
+  // git rev-list --count HEAD
+
   /// The name of the base ref or target branch of the pull request in a
   /// workflow run. This is only set when the event that triggers a workflow run
   /// is either pull_request or pull_request_target. For example, `main`.
