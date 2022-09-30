@@ -35,6 +35,9 @@ class Packages {
       var pubspec = yaml.loadYaml(pubspecFile.readAsStringSync()) as Map;
       if (pubspec.containsKey('auto_publish')) {
         var publishable = pubspec['auto_publish'] == true;
+
+        // todo: check for 'publish_to: none'
+
         packages.add(Package(directory, publishingEnabled: publishable));
       }
     } else {

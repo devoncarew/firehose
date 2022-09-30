@@ -1,6 +1,19 @@
 import 'dart:io';
 
+import 'package:firehose/src/utils.dart';
 import 'package:path/path.dart' as path;
+
+// from a branch:
+//   git.baseRef: main
+//   git.headRef: update_branch_logic
+//   git.ref: refs/pull/3/merge
+//   git.refName: 3/merge
+
+// from the default branch (after merging a PR):
+//   git.baseRef:
+//   git.headRef:
+//   git.ref: refs/heads/main
+//   git.refName: main
 
 class Git {
   /// The name of the base ref or target branch of the pull request in a
@@ -36,6 +49,34 @@ class Git {
   /// `feature-branch-1`.
   String? get refName {
     return Platform.environment['GITHUB_REF_NAME'];
+  }
+
+  /// The commit SHA that triggered the workflow. The value of this commit SHA
+  /// depends on the event that triggered the workflow. For example,
+  /// `ffac537e6cbbf934b08745a378932722df287a53`.
+  String? get sha {
+    return Platform.environment['GITHUB_SHA'];
+  }
+
+  List<String> getCommitChangedFiles() {
+    // run: git diff --name-only HEAD HEAD~1
+    var result = exec(
+      'git',
+      args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],
+    );
+    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
+  }
+
+  List<String> getPRChangedFiles() {
+    // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
+    var result = exec(
+      'git',
+      args: ['diff', '$baseRef!..$headRef!', '--name-status'],
+    );
+    if (result.exitCode != 0) {
+      print('oops: ${result.stderr}');
+    }
+    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
   }
 
   /// Return the name of the current branch.
