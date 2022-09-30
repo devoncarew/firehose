@@ -1,11 +1,44 @@
 import 'dart:io';
 
 class Changelog {
-  // todo: current version
-  // todo: current entries
   // todo: well-formed?
 
   final File file;
 
   Changelog(this.file);
+
+  bool get exists => file.existsSync();
+
+  String? get latestVersion {
+    var sections = _parseSections();
+    return sections.isEmpty ? null : sections.first.title.substring(3).trim();
+  }
+
+  List<String> get latestChangeEntries {
+    var sections = _parseSections();
+    return sections.isEmpty ? [] : sections.first.entries;
+  }
+
+  List<_Section> _parseSections() {
+    var sections = <_Section>[];
+    _Section? section;
+
+    for (var line in file.readAsLinesSync().where((line) => line.isNotEmpty)) {
+      if (line.startsWith('## ')) {
+        section = _Section(line);
+        sections.add(section);
+      } else if (section != null) {
+        section.entries.add(line);
+      }
+    }
+
+    return sections;
+  }
+}
+
+class _Section {
+  final String title;
+  final List<String> entries = [];
+
+  _Section(this.title);
 }

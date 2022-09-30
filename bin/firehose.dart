@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:firehose/firehose.dart' as firehose;
+import 'package:firehose/src/changelog.dart';
 import 'package:firehose/src/git.dart';
 
 // for a PR:
@@ -38,4 +41,9 @@ void main(List<String> arguments) {
   for (var file in git.getChangedFiles()) {
     print('  $file');
   }
+
+  var changelog = Changelog(File('CHANGELOG.md'));
+  print('');
+  print('changelog title: ${changelog.latestVersion}');
+  print('entries: [${changelog.latestChangeEntries.join('\n')}]');
 }
