@@ -2,6 +2,18 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+// from a branch:
+//   git.baseRef: main
+//   git.headRef: update_branch_logic
+//   git.ref: refs/pull/3/merge
+//   git.refName: 3/merge
+
+// from the default branch (after merging a PR):
+//   git.baseRef:
+//   git.headRef:
+//   git.ref: refs/heads/main
+//   git.refName: main
+
 class Git {
   /// The name of the base ref or target branch of the pull request in a
   /// workflow run. This is only set when the event that triggers a workflow run
@@ -36,6 +48,13 @@ class Git {
   /// `feature-branch-1`.
   String? get refName {
     return Platform.environment['GITHUB_REF_NAME'];
+  }
+
+  /// The commit SHA that triggered the workflow. The value of this commit SHA
+  /// depends on the event that triggered the workflow. For example,
+  /// `ffac537e6cbbf934b08745a378932722df287a53`.
+  String? get sha {
+    return Platform.environment['GITHUB_SHA'];
   }
 
   /// Return the name of the current branch.

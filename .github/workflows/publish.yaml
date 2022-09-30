@@ -1,0 +1,34 @@
+name: publish
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  publish:
+    if: github.repository_owner == 'devoncarew'
+    runs-on: ubuntu-latest
+    steps:
+      # Checks out a copy of the repo.
+      - name: Check out repo
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        with:
+          # Fetch all history so the tool can get all the tags to determine version.
+          fetch-depth: 0
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
+
+      - name: pub get
+        run: dart pub get
+
+      - name: Verify or publish packages
+        run: dart bin/firehose.dart
+
+      - name: Show changed files in current commit
+        run: git diff --name-only HEAD HEAD~1
+
+      - name: Show changed files in the PR
+        run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
