@@ -1,4 +1,4 @@
-name: publish
+name: Pub
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  publish:
+  auto-publish:
     if: github.repository_owner == 'devoncarew'
     runs-on: ubuntu-latest
     steps:
@@ -27,8 +27,3 @@ jobs:
       - name: Verify or publish packages
         run: dart bin/firehose.dart
 
-      - name: Show changed files in current commit
-        run: git diff --name-only HEAD HEAD~1
-
-      - name: Show changed files in the PR
-        run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status

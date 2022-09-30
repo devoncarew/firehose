@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firehose/src/utils.dart';
 import 'package:path/path.dart' as path;
 
 // from a branch:
@@ -55,6 +56,24 @@ class Git {
   /// `ffac537e6cbbf934b08745a378932722df287a53`.
   String? get sha {
     return Platform.environment['GITHUB_SHA'];
+  }
+
+  List<String> getCommitChangedFiles() {
+    // run: git diff --name-only HEAD HEAD~1
+    var result = exec(
+      'git',
+      args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],
+    );
+    return result.stdout.split('\n');
+  }
+
+  List<String> getPRChangedFiles() {
+    // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
+    var result = exec(
+      'git',
+      args: ['diff', baseRef!, headRef!, '--name-status'],
+    );
+    return result.stdout.split('\n');
   }
 
   /// Return the name of the current branch.
