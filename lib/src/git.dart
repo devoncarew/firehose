@@ -58,6 +58,8 @@ class Git {
     return Platform.environment['GITHUB_SHA'];
   }
 
+  // this seems to get all the changes files in a PR...
+
   List<String> getCommitChangedFiles() {
     // run: git diff --name-only HEAD HEAD~1
     var result = exec(
@@ -71,7 +73,7 @@ class Git {
     // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
     var result = exec(
       'git',
-      args: ['diff', '$baseRef!..$headRef!', '--name-status'],
+      args: ['diff', '$baseRef..$headRef', '--name-status'],
     );
     if (result.exitCode != 0) {
       print('oops: ${result.stderr}');
