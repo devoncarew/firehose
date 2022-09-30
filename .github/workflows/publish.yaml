@@ -26,4 +26,3 @@ jobs:
 
       - name: Verify or publish packages
         run: dart bin/firehose.dart
-

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:firehose/src/utils.dart';
-import 'package:path/path.dart' as path;
 
 // from a branch:
 //   git.baseRef: main
@@ -58,54 +57,30 @@ class Git {
     return Platform.environment['GITHUB_SHA'];
   }
 
-  // this seems to get all the changes files in a PR...
-
-  List<String> getCommitChangedFiles() {
+  /// Get the list of changed files for this PR or push to main.
+  List<String> getChangedFiles({bool excludeTopLevelDotFiles = true}) {
     // run: git diff --name-only HEAD HEAD~1
     var result = exec(
       'git',
       args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],
     );
-    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
+    return result.stdout
+        .split('\n')
+        .where((str) => str.isNotEmpty)
+        .where((path) {
+      return excludeTopLevelDotFiles ? !path.startsWith('.') : true;
+    }).toList();
   }
 
-  List<String> getPRChangedFiles() {
-    // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
-    var result = exec(
-      'git',
-      args: ['diff', '$baseRef..$headRef', '--name-status'],
-    );
-    if (result.exitCode != 0) {
-      print('oops: ${result.stderr}');
-    }
-    return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
-  }
-
-  /// Return the name of the current branch.
-  ///
-  /// Returns null when run in a location not under source control.
-  String? get currentBranch {
-    // var branchName = Platform.environment['GITHUB_HEAD_REF'];
-    // if (branchName != null) {
-    //   return branchName;
-    // }
-
-    // .git/HEAD
-    var headFile = File(path.join('.git', 'HEAD'));
-    if (!headFile.existsSync()) {
-      return null;
-    }
-
-    // ref: refs/heads/main
-    var line = headFile.readAsLinesSync().first;
-    return line.split('/').last;
-
-    // var results = exec('git', args: ['branch', '--show-current']);
-    // if (results.exitCode != 0) {
-    //   return null;
-    // }
-
-    // branchName = results.stdout.split('\n').first.trim();
-    // return branchName.isEmpty ? null : branchName;
-  }
+  // List<String> getPRChangedFiles() {
+  //   // run: git diff $GITHUB_BASE_REF..$GITHUB_HEAD_REF --name-status
+  //   var result = exec(
+  //     'git',
+  //     args: ['diff', '$baseRef..$headRef', '--name-status'],
+  //   );
+  //   if (result.exitCode != 0) {
+  //     print('oops: ${result.stderr}');
+  //   }
+  //   return result.stdout.split('\n').where((str) => str.isNotEmpty).toList();
+  // }
 }

@@ -34,13 +34,8 @@ void main(List<String> arguments) {
   print('git.refName: ${git.refName}');
 
   print('');
-  print('commit changed files:');
-  for (var file in git.getCommitChangedFiles()) {
-    print('  $file');
-  }
-
-  print('PR changed files:');
-  for (var file in git.getPRChangedFiles()) {
+  print('changed files:');
+  for (var file in git.getChangedFiles()) {
     print('  $file');
   }
 }
