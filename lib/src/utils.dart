@@ -12,6 +12,8 @@ class ExecResults {
   });
 }
 
+/// Execute the given CLI command and return the results (exit code, stdout, and
+/// stderr).
 ExecResults exec(
   String command, {
   List<String> args = const [],
