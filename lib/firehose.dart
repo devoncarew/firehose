@@ -10,10 +10,16 @@ class Firehose {
 
   void verify() {
     // todo:
+    print('todo: verify');
+    print('');
+    scratch();
   }
 
   void publish() {
     // todo:
+    print('todo: publish');
+    print('');
+    scratch();
   }
 }
 

@@ -2,20 +2,30 @@ name: Pub
 
 on:
   push:
-    branches: [ main ]
+    branches: 
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+# todo: support 'workflow_dispatch' to allow manually starting the action
+
+# todo: to use this, make sure the repo's configured to squash PR commits
 
 jobs:
   auto-publish:
+    # todo: update
     if: github.repository_owner == 'devoncarew'
+    # Needed to push a tag back to the repo.
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       # Checks out a copy of the repo.
       - name: Check out repo
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        # Fetch all history so the tool can get all the tags to determine version.
         with:
-          # Fetch all history so the tool can get all the tags to determine version.
           fetch-depth: 0
 
       - name: Set up Dart
@@ -24,5 +34,10 @@ jobs:
       - name: pub get
         run: dart pub get
 
-      - name: Verify or publish packages
-        run: dart bin/firehose.dart
+      - name: Verify changed packages (publishing dry-run)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: dart bin/firehose.dart --verify
+
+      - name: Publish changed packages
+        if: ${{ github.event_name == 'push' }}
+        run: dart bin/firehose.dart --publish
