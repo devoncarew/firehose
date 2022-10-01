@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firehose/src/packages.dart';
 import 'package:firehose/src/utils.dart';
+import 'package:path/path.dart' as path;
 
 import 'src/git.dart';
 
@@ -155,21 +156,39 @@ class Firehose {
             "changelog (${package.changelog.latestVersion})don't agree.");
       }
 
-      // todo: use github secrets
-      var result = exec('dart', args: [
-        'pub',
-        'publish',
-        '--force',
-        '--directory=${package.directory.path}',
-      ]);
-      if (result.exitCode != 0) {
-        exitCode = result.exitCode;
-      }
-      if (result.stdout.isNotEmpty) {
-        print(result.stdout.trimRight());
-      }
-      if (result.stderr.isNotEmpty) {
-        stderr.writeln(result.stderr.trimRight());
+      if (Platform.environment.containsKey('PUB_CREDENTIALS')) {
+        // Copy the pub oath information from the passed in environment variable
+        // to a credentials file.
+        var oathCredentials = Platform.environment['PUB_CREDENTIALS']!;
+        var tempDir = Directory(Platform.environment['RUNNER_TEMP']!);
+        var credentialsFile =
+            File(path.join(tempDir.path, 'pub-credentials.json'));
+        credentialsFile.writeAsStringSync(oathCredentials);
+
+        print('dart pub publish --force --directory=${package.directory.path}');
+        var result = exec(
+          'dart',
+          args: [
+            'pub',
+            'publish',
+            '--force',
+            '--directory=${package.directory.path}',
+          ],
+          env: {
+            '_PUB_TEST_CONFIG_DIR': tempDir.path,
+          },
+        );
+        if (result.exitCode != 0) {
+          exitCode = result.exitCode;
+        }
+        if (result.stdout.isNotEmpty) {
+          print(result.stdout.trimRight());
+        }
+        if (result.stderr.isNotEmpty) {
+          stderr.writeln(result.stderr.trimRight());
+        }
+      } else {
+        _failure('PUB_CREDENTIALS env variable not found; unable to publish.');
       }
     }
   }

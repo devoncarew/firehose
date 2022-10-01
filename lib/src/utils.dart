@@ -18,8 +18,14 @@ ExecResults exec(
   String command, {
   List<String> args = const [],
   Directory? cwd,
+  Map<String, String>? env,
 }) {
-  var result = Process.runSync(command, args, workingDirectory: cwd?.path);
+  var result = Process.runSync(
+    command,
+    args,
+    workingDirectory: cwd?.path,
+    environment: env,
+  );
   return ExecResults(
     exitCode: result.exitCode,
     stdout: result.stdout,
