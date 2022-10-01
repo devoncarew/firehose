@@ -1,8 +1,6 @@
 import 'dart:io';
 
 class Changelog {
-  // todo: well-formed?
-
   final File file;
 
   Changelog(this.file);

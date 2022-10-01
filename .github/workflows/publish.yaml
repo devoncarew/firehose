@@ -1,4 +1,4 @@
-name: Pub
+name: Publish
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 # todo: support 'workflow_dispatch' to allow manually starting the action
 
-# todo: to use this, make sure the repo's configured to squash PR commits
+# todo: to use this, make sure the repo is configured to squash PR commits
 
 jobs:
   auto-publish:
@@ -34,7 +34,7 @@ jobs:
       - name: pub get
         run: dart pub get
 
-      - name: Verify changed packages (publishing dry-run)
+      - name: Verify changed packages (publish dry-run)
         if: ${{ github.event_name == 'pull_request' }}
         run: dart bin/firehose.dart --verify
 

@@ -1,17 +1,42 @@
 import 'dart:io';
 
+import 'package:firehose/src/changelog.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart' as yaml;
 
+import 'pubspec.dart';
+
 class Package {
-  // Package
   final Directory directory;
   final bool publishingEnabled;
+
+  late final Pubspec pubspec;
+  late final Changelog changelog;
 
   Package(
     this.directory, {
     this.publishingEnabled = true,
-  });
+  }) {
+    pubspec = Pubspec(directory);
+    changelog = Changelog(File(path.join(directory.path, 'CHANGELOG.md')));
+  }
+
+  bool containsFile(String file) {
+    return path.isWithin(directory.path, file);
+  }
+
+  List<String> matchingFiles(List<String> changedFiles) {
+    var fullPath = directory.absolute.path;
+    return changedFiles.where((file) => containsFile(file)).map((file) {
+      return File(file).absolute.path.substring(fullPath.length + 1);
+    }).toList();
+  }
+
+  @override
+  String toString() {
+    var notPublishable = publishingEnabled ? '' : ' [publishing disabled]';
+    return '${pubspec.name}, ${directory.path}, ${pubspec.version}$notPublishable';
+  }
 }
 
 class Packages {
