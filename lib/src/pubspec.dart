@@ -17,6 +17,10 @@ class Pubspec {
   /// Return the package name.
   String get name => _yaml['name'];
 
+  dynamic get autoPublishValue => _yaml['auto_publish'];
+
+  dynamic get publishToValue => _yaml['publish_to'];
+
   /// Return the package version.
   ///
   /// Returns null if no version is specified.
