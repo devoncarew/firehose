@@ -20,47 +20,50 @@ class Firehose {
     var git = Git();
 
     var changedFiles = git.getChangedFiles();
-    print('changed files');
+    print('repo changed files');
     for (var file in changedFiles) {
       print('- $file');
     }
 
     var packages = Packages().locatePackages();
     print('');
-    print('all publishable repo packages');
+    print('repo publishable packages');
     for (var package in packages) {
       print('- $package');
     }
 
     var changedPackages = _calculateChangedPackages(packages, changedFiles);
     print('');
-    print('${changedPackages.length} changed packages');
+    print('${changedPackages.length} changed package(s)');
 
     for (var package in changedPackages) {
       print('');
       print(_bold(package.pubspec.name));
-      print('pubspec version: ${_bold(package.pubspec.version.toString())}');
+      print('pubspec:');
+      print('  version: ${_bold(package.pubspec.version.toString())}');
       var files = package.matchingFiles(changedFiles);
-      print('files:');
+      print('changed files:');
       for (var file in files) {
         print('  $file');
       }
-      print('changelog version: ${_bold(package.changelog.latestVersion)}');
+      print('changelog:');
+      print('  version: ${_bold(package.changelog.latestVersion)}');
       var changelogUpdated = files.contains('CHANGELOG.md');
       if (!changelogUpdated) {
         _failure('No changelog update for this change.');
       }
       if (changelogUpdated) {
         if (package.changelog.latestVersion != null) {
-          print('## ${package.changelog.latestVersion}');
+          print('  ## ${package.changelog.latestVersion}');
         }
         for (var entry in package.changelog.latestChangeEntries) {
-          print(entry);
+          print('  $entry');
         }
       }
       if (package.pubspec.version.toString() !=
           package.changelog.latestVersion) {
-        _failure("pubspec version and changelog don't agree.");
+        _failure("pubspec version (${package.pubspec.version}) and "
+            "changelog (${package.changelog.latestVersion})don't agree.");
       }
     }
   }
