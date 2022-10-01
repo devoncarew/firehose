@@ -29,7 +29,7 @@ class Firehose {
     print('');
     print('Repository publishable packages:');
     for (var package in packages) {
-      print('- $package');
+      print('  $package');
     }
 
     var changedPackages = _calculateChangedPackages(packages, changedFiles);

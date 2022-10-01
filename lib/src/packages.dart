@@ -35,8 +35,8 @@ class Package {
   @override
   String toString() {
     var notPublishable = publishingEnabled ? '' : ' [publishing disabled]';
-    return '${pubspec.name}, ${path.relative(directory.path)}, '
-        '${pubspec.version}$notPublishable';
+    return 'package:${pubspec.name}, ${pubspec.version}, '
+        '${path.relative(directory.path)}$notPublishable';
   }
 }
 
