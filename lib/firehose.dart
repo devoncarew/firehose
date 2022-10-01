@@ -37,29 +37,36 @@ class Firehose {
     print('${changedPackages.length} changed packages');
 
     void failure(String message) {
-      stderr.writeln(message);
+      stderr.writeln('error: $message');
       exitCode = 1;
     }
 
     String bold(String? message) {
-      return '\u00033[1m$message\u00033[0m';
+      return '\u001b[1m$message\u001b[0m';
     }
 
     for (var package in changedPackages) {
       print('');
       print(bold(package.pubspec.name));
+      print('pubspec version: ${bold(package.pubspec.version.toString())}');
       var files = package.matchingFiles(changedFiles);
+      print('files:');
       for (var file in files) {
         print('  $file');
       }
-      print('pubspec version: ${bold(package.pubspec.version.toString())}');
       print('changelog version: ${bold(package.changelog.latestVersion)}');
-      if (!files.contains('CHANGELOG.md')) {
+      var changelogUpdated = files.contains('CHANGELOG.md');
+      if (!changelogUpdated) {
         failure('No changelog update for this change.');
       }
       if (package.pubspec.version.toString() !=
           package.changelog.latestVersion) {
-        failure('The pubspec version and changelog entry version don\'t agree');
+        failure("pubspec version and changelog don't agree.");
+      }
+      if (changelogUpdated) {
+        for (var entry in package.changelog.latestChangeEntries) {
+          print(entry);
+        }
       }
 
       // todo:
