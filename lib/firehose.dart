@@ -38,7 +38,7 @@ class Firehose {
 
     for (var package in changedPackages) {
       print('');
-      print('Validating ${_bold('package:{package.pubspec.name}')}');
+      print('Validating ${_bold('package:${package.pubspec.name}')}');
 
       print('pubspec:');
       print('  version: ${_bold(package.pubspec.version.toString())}');
@@ -52,11 +52,10 @@ class Firehose {
       var files = package.matchingFiles(changedFiles);
 
       print('changelog:');
-      print('  version: ${_bold(package.changelog.latestVersion)}');
       var changelogUpdated = files.contains('CHANGELOG.md');
       if (changelogUpdated) {
         if (package.changelog.latestVersion != null) {
-          print('  ## ${package.changelog.latestVersion}');
+          print('  ## ${_bold(package.changelog.latestVersion)}');
         }
         for (var entry in package.changelog.latestChangeEntries) {
           print('  $entry');
@@ -69,13 +68,19 @@ class Firehose {
       }
 
       // checks
+      var issues = 0;
       if (!changelogUpdated) {
+        issues++;
         _failure('No changelog update for this change.');
       }
       if (package.pubspec.version.toString() !=
           package.changelog.latestVersion) {
+        issues++;
         _failure("pubspec version (${package.pubspec.version}) and "
             "changelog (${package.changelog.latestVersion})don't agree.");
+      }
+      if (issues == 0) {
+        print('No issues found.');
       }
     }
   }
