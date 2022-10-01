@@ -35,7 +35,8 @@ class Package {
   @override
   String toString() {
     var notPublishable = publishingEnabled ? '' : ' [publishing disabled]';
-    return '${pubspec.name}, ${directory.path}, ${pubspec.version}$notPublishable';
+    return 'package:${pubspec.name}, ${pubspec.version}, '
+        '${path.relative(directory.path)}$notPublishable';
   }
 }
 
@@ -60,9 +61,10 @@ class Packages {
       var pubspec = yaml.loadYaml(pubspecFile.readAsStringSync()) as Map;
       if (pubspec.containsKey('auto_publish')) {
         var publishable = pubspec['auto_publish'] == true;
-
-        // todo: check for 'publish_to: none'
-
+        // check for 'publish_to: none'
+        if (pubspec['publish_to'] == 'none') {
+          publishable = false;
+        }
         packages.add(Package(directory, publishingEnabled: publishable));
       }
     } else {

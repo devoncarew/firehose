@@ -1,4 +1,4 @@
-## 0.2.0
+## 0.2.0-dev
 
 - Added support for publishing packages from the default branch.
 - Added support for verifying packages from PR branches.

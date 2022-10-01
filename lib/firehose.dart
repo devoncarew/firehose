@@ -20,50 +20,67 @@ class Firehose {
     var git = Git();
 
     var changedFiles = git.getChangedFiles();
-    print('repo changed files');
+    print('Repository changed files:');
     for (var file in changedFiles) {
       print('- $file');
     }
 
     var packages = Packages().locatePackages();
     print('');
-    print('repo publishable packages');
+    print('Repository publishable packages:');
     for (var package in packages) {
-      print('- $package');
+      print('  $package');
     }
 
     var changedPackages = _calculateChangedPackages(packages, changedFiles);
     print('');
-    print('${changedPackages.length} changed package(s)');
+    print('Found ${changedPackages.length} changed package(s).');
 
     for (var package in changedPackages) {
       print('');
-      print(_bold(package.pubspec.name));
+      print('Validating ${_bold('package:${package.pubspec.name}')}');
+
       print('pubspec:');
       print('  version: ${_bold(package.pubspec.version.toString())}');
+      if (package.pubspec.autoPublishValue != null) {
+        print('  auto_publish: ${package.pubspec.autoPublishValue}');
+      }
+      if (package.pubspec.publishToValue != null) {
+        print('  publish_to: ${package.pubspec.publishToValue}');
+      }
+
       var files = package.matchingFiles(changedFiles);
-      print('changed files:');
-      for (var file in files) {
-        print('  $file');
-      }
+
       print('changelog:');
-      print('  version: ${_bold(package.changelog.latestVersion)}');
       var changelogUpdated = files.contains('CHANGELOG.md');
-      if (!changelogUpdated) {
-        _failure('No changelog update for this change.');
-      }
       if (changelogUpdated) {
         if (package.changelog.latestVersion != null) {
-          print('  ## ${package.changelog.latestVersion}');
+          print('  ## ${_bold(package.changelog.latestVersion)}');
         }
         for (var entry in package.changelog.latestChangeEntries) {
           print('  $entry');
         }
       }
+
+      print('changed files:');
+      for (var file in files) {
+        print('  $file');
+      }
+
+      // checks
+      var issues = 0;
+      if (!changelogUpdated) {
+        issues++;
+        _failure('No changelog update for this change.');
+      }
       if (package.pubspec.version.toString() !=
           package.changelog.latestVersion) {
+        issues++;
         _failure("pubspec version (${package.pubspec.version}) and "
             "changelog (${package.changelog.latestVersion})don't agree.");
+      }
+      if (issues == 0) {
+        print('No issues found.');
       }
     }
   }
