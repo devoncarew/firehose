@@ -26,6 +26,7 @@ class Firehose {
     }
 
     var packages = Packages().locatePackages();
+    print('');
     print('all publishable repo packages');
     for (var package in packages) {
       print('- $package');
@@ -35,19 +36,33 @@ class Firehose {
     print('');
     print('${changedPackages.length} changed packages');
 
+    void failure(String message) {
+      stderr.writeln(message);
+      exitCode = 1;
+    }
+
+    String bold(String? message) {
+      return '\u00033[1m$message\u00033[0m';
+    }
+
     for (var package in changedPackages) {
       print('');
-      print(package.pubspec.name);
+      print(bold(package.pubspec.name));
       var files = package.matchingFiles(changedFiles);
       for (var file in files) {
         print('  $file');
       }
-      print('pubspec version: ${package.pubspec.version}');
-      print('changelog version: ${package.changelog.latestVersion}');
-      // todo: pubspec changed?
-      // todo: print changelog entry?
-      // - validate that there's a changelog entry
-      // - validate that the changelog version == the pubspec version
+      print('pubspec version: ${bold(package.pubspec.version.toString())}');
+      print('changelog version: ${bold(package.changelog.latestVersion)}');
+      if (!files.contains('CHANGELOG.md')) {
+        failure('No changelog update for this change.');
+      }
+      if (package.pubspec.version.toString() !=
+          package.changelog.latestVersion) {
+        failure('The pubspec version and changelog entry version don\'t agree');
+      }
+
+      // todo:
       // - validate that the pubspec version != a published version
     }
   }
