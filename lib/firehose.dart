@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:io' hide exitCode;
+import 'dart:io' as io show exitCode;
 
 import 'package:firehose/src/packages.dart';
-import 'package:firehose/src/utils.dart';
 import 'package:path/path.dart' as path;
 
 import 'src/git.dart';
@@ -89,7 +90,7 @@ class Firehose {
 
   // todo: figure out how to share code between verify() and publish()
 
-  void publish() {
+  void publish() async {
 // for the default branch:
 // - determine changed files
 // - determine affected packages
@@ -160,32 +161,33 @@ class Firehose {
         // Copy the pub oath information from the passed in environment variable
         // to a credentials file.
         var oathCredentials = Platform.environment['PUB_CREDENTIALS']!;
-        var tempDir = Directory(Platform.environment['RUNNER_TEMP']!);
-        var credentialsFile =
-            File(path.join(tempDir.path, 'pub-credentials.json'));
+        var configDir = Directory(
+          path.join(Platform.environment['HOME']!, '.config', 'dart'),
+        );
+        var credentialsFile = File(
+          path.join(configDir.path, 'pub-credentials.json'),
+        );
         credentialsFile.writeAsStringSync(oathCredentials);
 
-        print('dart pub publish --force --directory=${package.directory.path}');
-        var result = exec(
+        print('dart pub publish --force');
+        var process = await Process.start(
           'dart',
-          args: [
-            'pub',
-            'publish',
-            '--force',
-            '--directory=${package.directory.path}',
-          ],
-          env: {
-            '_PUB_TEST_CONFIG_DIR': tempDir.path,
-          },
+          ['pub', 'publish', '--force'],
+          workingDirectory: package.directory.path,
         );
-        if (result.exitCode != 0) {
-          exitCode = result.exitCode;
-        }
-        if (result.stdout.isNotEmpty) {
-          print(result.stdout.trimRight());
-        }
-        if (result.stderr.isNotEmpty) {
-          stderr.writeln(result.stderr.trimRight());
+
+        process.stdout
+            .transform(utf8.decoder)
+            .transform(LineSplitter())
+            .listen((line) => stdout.writeln('  $line'));
+        process.stderr
+            .transform(utf8.decoder)
+            .transform(LineSplitter())
+            .listen((line) => stderr.writeln('  $line'));
+
+        var code = await process.exitCode;
+        if (code != 0) {
+          io.exitCode = code;
         }
       } else {
         _failure('PUB_CREDENTIALS env variable not found; unable to publish.');
@@ -210,7 +212,7 @@ class Firehose {
 
   void _failure(String message) {
     print('\u001b[31merror: $message\u001b[0m');
-    exitCode = 1;
+    io.exitCode = 1;
   }
 
   String _bold(String? message) {
