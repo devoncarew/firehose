@@ -43,3 +43,4 @@ jobs:
       - name: Publish changed packages
         if: ${{ github.event_name == 'push' }}
         run: dart bin/firehose.dart --publish
+        env: {PUB_CREDENTIALS: "${{ secrets.PUB_CREDENTIALS }}"}
