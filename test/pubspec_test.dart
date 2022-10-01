@@ -27,7 +27,7 @@ void main() {
     test('autoPublishValue', () {
       var value = pubspec.autoPublishValue;
       expect(value, isNotNull);
-      expect(value, equals('true'));
+      expect(value, equals(true));
     });
   });
 }
