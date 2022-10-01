@@ -26,11 +26,10 @@ class Package {
   }
 
   List<String> matchingFiles(List<String> changedFiles) {
-    var rel = path.relative(directory.path);
-    return changedFiles
-        .where((file) => containsFile(file))
-        .map((file) => file.substring(rel.length))
-        .toList();
+    var fullPath = directory.absolute.path;
+    return changedFiles.where((file) => containsFile(file)).map((file) {
+      return File(file).absolute.path.substring(fullPath.length);
+    }).toList();
   }
 
   @override
