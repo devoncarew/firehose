@@ -12,10 +12,22 @@ void main() {
       pubspec = Pubspec(Directory.current);
     });
 
+    test('name', () {
+      var name = pubspec.name;
+      expect(name, isNotNull);
+      expect(name, equals('firehose'));
+    });
+
     test('version', () {
       var version = pubspec.version;
       expect(version, isNotNull);
       expect(version, greaterThan(Version.none));
+    });
+
+    test('autoPublishValue', () {
+      var value = pubspec.autoPublishValue;
+      expect(value, isNotNull);
+      expect(value, equals(true));
     });
   });
 }

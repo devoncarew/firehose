@@ -1,4 +1,10 @@
+# A CI configuration to auto-publish pub packages.
+#
+# To use this script, make sure the repo is configured to squash PR commits.
+
 name: Publish
+
+# todo: support 'workflow_dispatch' to allow manually starting the action
 
 on:
   push:
@@ -7,10 +13,6 @@ on:
   pull_request:
     branches:
       - main
-
-# todo: support 'workflow_dispatch' to allow manually starting the action
-
-# todo: to use this, make sure the repo is configured to squash PR commits
 
 jobs:
   auto-publish:
@@ -21,17 +23,17 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      # Checks out a copy of the repo.
+      # Checks out a copy of the repo. This fetches all commits in order to
+      # determine which files have changed.
       - name: Check out repo
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
-        # Fetch all history so the tool can get all the tags to determine version.
         with:
           fetch-depth: 0
 
       - name: Set up Dart
         uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
 
-      - name: pub get
+      - name: Pub get
         run: dart pub get
 
       - name: Verify changed packages (publish dry-run)
