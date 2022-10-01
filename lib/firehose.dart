@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:firehose/src/packages.dart';
 
-import 'src/changelog.dart';
 import 'src/git.dart';
 
 class Firehose {
@@ -17,6 +16,7 @@ class Firehose {
 // - validate that there's a changelog entry
 // - validate that the changelog version == the pubspec version
 // - validate that the pubspec version != a published version
+
     var git = Git();
 
     var changedFiles = git.getChangedFiles();
@@ -36,41 +36,32 @@ class Firehose {
     print('');
     print('${changedPackages.length} changed packages');
 
-    void failure(String message) {
-      stderr.writeln('error: $message');
-      exitCode = 1;
-    }
-
-    String bold(String? message) {
-      return '\u001b[1m$message\u001b[0m';
-    }
-
     for (var package in changedPackages) {
       print('');
-      print(bold(package.pubspec.name));
-      print('pubspec version: ${bold(package.pubspec.version.toString())}');
+      print(_bold(package.pubspec.name));
+      print('pubspec version: ${_bold(package.pubspec.version.toString())}');
       var files = package.matchingFiles(changedFiles);
       print('files:');
       for (var file in files) {
         print('  $file');
       }
-      print('changelog version: ${bold(package.changelog.latestVersion)}');
+      print('changelog version: ${_bold(package.changelog.latestVersion)}');
       var changelogUpdated = files.contains('CHANGELOG.md');
       if (!changelogUpdated) {
-        failure('No changelog update for this change.');
-      }
-      if (package.pubspec.version.toString() !=
-          package.changelog.latestVersion) {
-        failure("pubspec version and changelog don't agree.");
+        _failure('No changelog update for this change.');
       }
       if (changelogUpdated) {
+        if (package.changelog.latestVersion != null) {
+          print('## ${package.changelog.latestVersion}');
+        }
         for (var entry in package.changelog.latestChangeEntries) {
           print(entry);
         }
       }
-
-      // todo:
-      // - validate that the pubspec version != a published version
+      if (package.pubspec.version.toString() !=
+          package.changelog.latestVersion) {
+        _failure("pubspec version and changelog don't agree.");
+      }
     }
   }
 
@@ -84,7 +75,7 @@ class Firehose {
     // todo:
     print('todo: publish');
     print('');
-    scratch();
+    verify();
   }
 
   List<Package> _calculateChangedPackages(
@@ -101,23 +92,13 @@ class Firehose {
     }
     return results.toList();
   }
-}
 
-void scratch() {
-  var git = Git();
-  print('git.baseRef: ${git.baseRef}');
-  print('git.headRef: ${git.headRef}');
-  print('git.ref: ${git.ref}');
-  print('git.refName: ${git.refName}');
-
-  print('');
-  print('changed files:');
-  for (var file in git.getChangedFiles()) {
-    print('  $file');
+  void _failure(String message) {
+    print('\u001b[31merror: $message\u001b[0m');
+    exitCode = 1;
   }
 
-  var changelog = Changelog(File('CHANGELOG.md'));
-  print('');
-  print('changelog title: ${changelog.latestVersion}');
-  print('entries: [${changelog.latestChangeEntries.join('\n')}]');
+  String _bold(String? message) {
+    return '\u001b[1m$message\u001b[0m';
+  }
 }
