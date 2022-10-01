@@ -34,7 +34,7 @@ jobs:
       - name: pub get
         run: dart pub get
 
-      - name: Verify changed packages (publishing dry-run)
+      - name: Verify changed packages (publish dry-run)
         if: ${{ github.event_name == 'pull_request' }}
         run: dart bin/firehose.dart --verify
 

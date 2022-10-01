@@ -20,13 +20,13 @@ class Firehose {
     var git = Git();
 
     var changedFiles = git.getChangedFiles();
-    print('changed files:');
+    print('changed files');
     for (var file in changedFiles) {
       print('- $file');
     }
 
     var packages = Packages().locatePackages();
-    print('publishable repo packages:');
+    print('all publishable repo packages');
     for (var package in packages) {
       print('- $package');
     }
@@ -37,8 +37,14 @@ class Firehose {
 
     for (var package in changedPackages) {
       print('');
-      print(package);
-      // todo: print package changed files
+      print(package.pubspec.name);
+      var files = package.matchingFiles(changedFiles);
+      for (var file in files) {
+        print('  $file');
+      }
+      print('pubspec version: ${package.pubspec.version}');
+      print('changelog version: ${package.changelog.latestVersion}');
+      // todo: pubspec changed?
       // todo: print changelog entry?
       // - validate that there's a changelog entry
       // - validate that the changelog version == the pubspec version

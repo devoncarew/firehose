@@ -25,6 +25,14 @@ class Package {
     return path.isWithin(directory.path, file);
   }
 
+  List<String> matchingFiles(List<String> changedFiles) {
+    var rel = path.relative(directory.path);
+    return changedFiles
+        .where((file) => containsFile(file))
+        .map((file) => file.substring(rel.length))
+        .toList();
+  }
+
   @override
   String toString() {
     var notPublishable = publishingEnabled ? '' : ' [publishing disabled]';
