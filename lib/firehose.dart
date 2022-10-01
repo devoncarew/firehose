@@ -164,6 +164,7 @@ class Firehose {
         var configDir = Directory(
           path.join(Platform.environment['HOME']!, '.config', 'dart'),
         );
+        configDir.createSync(recursive: true);
         var credentialsFile = File(
           path.join(configDir.path, 'pub-credentials.json'),
         );
