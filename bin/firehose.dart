@@ -1,4 +1,7 @@
-import 'package:firehose/firehose.dart' as firehose;
+import 'dart:io';
+
+import 'package:args/args.dart';
+import 'package:firehose/firehose.dart';
 import 'package:firehose/src/git.dart';
 
 // for a PR:
@@ -14,8 +17,6 @@ import 'package:firehose/src/git.dart';
 // - validate that the pubspec version != a published version
 // - attempt to publish
 
-// todo: support args (and help)
-
 // todo: parse changelog version
 
 // todo: determine paths changed from the current commit
@@ -25,22 +26,89 @@ import 'package:firehose/src/git.dart';
 // --verify, --publish, --verify-or-publish
 
 void main(List<String> arguments) {
-  print('Hello world: ${firehose.calculate()}!');
+  var argParser = _createArgs();
+  try {
+    var argResults = argParser.parse(arguments);
 
-  var git = Git();
-  print('git.baseRef: ${git.baseRef}');
-  print('git.headRef: ${git.headRef}');
-  print('git.ref: ${git.ref}');
-  print('git.refName: ${git.refName}');
+    if (argResults['help'] == true) {
+      _usage(argParser);
+      exit(0);
+    }
 
+    var verify = argResults['verify'] == true;
+    var publish = argResults['publish'] == true;
+    var verifyOrPublish = argResults['verify-or-publish'] == true;
+
+    if (!verify && !publish && !verifyOrPublish) {
+      _usage(argParser,
+          error: 'Error: one of --verify, --publish, or --verify-or-publish '
+              'must be specified.');
+      exit(1);
+    }
+
+    var git = Git();
+    if (publish && !git.inGithubContext) {
+      _usage(argParser,
+          error: 'Error: --publish can only be executed from within a GitHub '
+              'action.');
+      exit(1);
+    }
+
+    if (verifyOrPublish) {
+      if (!git.inGithubContext || git.onGithubPR) {
+        verify = true;
+      } else {
+        publish = true;
+      }
+    }
+
+    var firehose = Firehose(Directory.current);
+    if (verify) {
+      firehose.verify();
+    } else {
+      firehose.publish();
+    }
+  } on ArgParserException catch (e) {
+    _usage(argParser, error: e.message);
+    exit(1);
+  }
+}
+
+void _usage(ArgParser argParser, {String? error}) {
+  if (error != null) {
+    stderr.writeln(error);
+    stderr.writeln();
+  }
+
+  print('usage: dart bin/firehose.dart <options>');
   print('');
-  print('commit changed files:');
-  for (var file in git.getCommitChangedFiles()) {
-    print('  $file');
-  }
+  print(argParser.usage);
+}
 
-  print('PR changed files:');
-  for (var file in git.getPRChangedFiles()) {
-    print('  $file');
-  }
+ArgParser _createArgs() {
+  return ArgParser()
+    ..addFlag(
+      'help',
+      abbr: 'h',
+      negatable: false,
+      help: 'Print tool help.',
+    )
+    ..addFlag(
+      'verify',
+      negatable: false,
+      help: 'Validate any changes packages indicate whether --publish would '
+          'publish anything.',
+    )
+    ..addFlag(
+      'publish',
+      negatable: false,
+      help: 'Publish any changed packages.',
+    )
+    ..addFlag(
+      'verify-or-publish',
+      negatable: false,
+      help:
+          'Auto-detect the corrent behavior; on a PR, run --verify; on a merge '
+          'into the default branch, run --publish.',
+    );
 }
