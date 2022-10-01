@@ -1,4 +1,4 @@
-name: Pub
+name: Publish
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 # todo: support 'workflow_dispatch' to allow manually starting the action
 
-# todo: to use this, make sure the repo's configured to squash PR commits
+# todo: to use this, make sure the repo is configured to squash PR commits
 
 jobs:
   auto-publish:

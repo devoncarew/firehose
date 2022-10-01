@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:firehose/src/packages.dart';
+
 import 'src/changelog.dart';
 import 'src/git.dart';
 
@@ -9,17 +11,67 @@ class Firehose {
   Firehose(this.directory);
 
   void verify() {
-    // todo:
-    print('todo: verify');
+// for a PR:
+// - determine changed files
+// - determine affected packages
+// - validate that there's a changelog entry
+// - validate that the changelog version == the pubspec version
+// - validate that the pubspec version != a published version
+    var git = Git();
+
+    var changedFiles = git.getChangedFiles();
+    print('changed files:');
+    for (var file in changedFiles) {
+      print('- $file');
+    }
+
+    var packages = Packages().locatePackages();
+    print('publishable repo packages:');
+    for (var package in packages) {
+      print('- $package');
+    }
+
+    var changedPackages = _calculateChangedPackages(packages, changedFiles);
     print('');
-    scratch();
+    print('${changedPackages.length} changed packages');
+
+    for (var package in changedPackages) {
+      print('');
+      print(package);
+      // todo: print package changed files
+      // todo: print changelog entry?
+      // - validate that there's a changelog entry
+      // - validate that the changelog version == the pubspec version
+      // - validate that the pubspec version != a published version
+    }
   }
 
   void publish() {
+// for the default branch:
+// - determine changed files
+// - determine affected packages
+// - validate that the pubspec version != a published version
+// - attempt to publish
+
     // todo:
     print('todo: publish');
     print('');
     scratch();
+  }
+
+  List<Package> _calculateChangedPackages(
+    List<Package> packages,
+    List<String> changedFiles,
+  ) {
+    var results = <Package>{};
+    for (var package in packages) {
+      for (var file in changedFiles) {
+        if (package.containsFile(file)) {
+          results.add(package);
+        }
+      }
+    }
+    return results.toList();
   }
 }
 

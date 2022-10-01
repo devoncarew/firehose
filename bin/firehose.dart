@@ -4,27 +4,6 @@ import 'package:args/args.dart';
 import 'package:firehose/firehose.dart';
 import 'package:firehose/src/git.dart';
 
-// for a PR:
-// - determine changed files
-// - determine affected packages
-// - validate that there's a changelog entry
-// - validate that the changelog version == the pubspec version
-// - validate that the pubspec version != a published version
-
-// for the default branch:
-// - determine changed files
-// - determine affected packages
-// - validate that the pubspec version != a published version
-// - attempt to publish
-
-// todo: parse changelog version
-
-// todo: determine paths changed from the current commit
-
-// todo: determine paths changed from the current PR
-
-// --verify, --publish, --verify-or-publish
-
 void main(List<String> arguments) {
   var argParser = _createArgs();
   try {
