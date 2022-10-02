@@ -110,10 +110,11 @@ class Firehose {
       if (dryRun) {
         var issues = 0;
         if (!changelogUpdated) {
-          _failure('No changelog update for this change.');
           if (changelogExempt) {
-            print('  (ignoring due to changelog-exempt)');
+            print("No changelog update for this change (ignoring due to "
+                "'changelog-exempt').");
           } else {
+            _failure('No changelog update for this change.');
             issues++;
           }
         }
