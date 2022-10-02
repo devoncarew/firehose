@@ -99,7 +99,7 @@ class Firehose {
 
       List<String> prLabels;
       if (env.containsKey('PR_LABELS')) {
-        prLabels = jsonDecode(env['PR_LABELS']!);
+        prLabels = (jsonDecode(env['PR_LABELS']!) as List).cast<String>();
       } else {
         prLabels = [];
       }
