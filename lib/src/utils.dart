@@ -1,16 +1,5 @@
+import 'dart:convert';
 import 'dart:io';
-
-class ExecResults {
-  final int exitCode;
-  final String stdout;
-  final String stderr;
-
-  ExecResults({
-    required this.exitCode,
-    required this.stdout,
-    required this.stderr,
-  });
-}
 
 /// Execute the given CLI command and return the results (exit code, stdout, and
 /// stderr).
@@ -31,4 +20,41 @@ ExecResults exec(
     stdout: result.stdout,
     stderr: result.stderr,
   );
+}
+
+class ExecResults {
+  final int exitCode;
+  final String stdout;
+  final String stderr;
+
+  ExecResults({
+    required this.exitCode,
+    required this.stdout,
+    required this.stderr,
+  });
+}
+
+Future<int> stream(
+  String command, {
+  List<String> args = const [],
+  Directory? cwd,
+}) async {
+  print('$command ${args.join(' ')}');
+
+  var process = await Process.start(
+    command,
+    args,
+    workingDirectory: cwd?.path,
+  );
+
+  process.stdout
+      .transform(utf8.decoder)
+      .transform(LineSplitter())
+      .listen((line) => stdout.writeln('  $line'));
+  process.stderr
+      .transform(utf8.decoder)
+      .transform(LineSplitter())
+      .listen((line) => stderr.writeln('  $line'));
+
+  return process.exitCode;
 }

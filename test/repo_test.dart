@@ -1,12 +1,17 @@
-import 'package:firehose/src/packages.dart';
+import 'package:firehose/src/repo.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('packages', () {
-    late Packages packages;
+  group('repo', () {
+    late Repo packages;
 
     setUp(() {
-      packages = Packages();
+      packages = Repo();
+    });
+
+    test('singlePackageRepo', () {
+      var result = packages.singlePackageRepo;
+      expect(result, true);
     });
 
     test('locatePackages', () {

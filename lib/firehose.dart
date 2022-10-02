@@ -1,11 +1,17 @@
-import 'dart:convert';
 import 'dart:io' hide exitCode;
 import 'dart:io' as io show exitCode;
 
-import 'package:firehose/src/packages.dart';
+import 'package:firehose/src/repo.dart';
 import 'package:path/path.dart' as path;
 
 import 'src/git.dart';
+import 'src/utils.dart';
+
+// todo: support having a github label which will disable validation? and also
+// disable publishing
+
+// todo: support allowing the glob of files to ignore to be configurable in the
+// action configuration file (test/**, ...)
 
 class Firehose {
   final Directory directory;
@@ -18,7 +24,6 @@ class Firehose {
 // - determine affected packages
 // - validate that there's a changelog entry
 // - validate that the changelog version == the pubspec version
-// - validate that the pubspec version != a published version
 
     var git = Git();
 
@@ -28,7 +33,7 @@ class Firehose {
       print('- $file');
     }
 
-    var packages = Packages().locatePackages();
+    var packages = Repo().locatePackages();
     print('');
     print('Repository publishable packages:');
     for (var package in packages) {
@@ -41,10 +46,11 @@ class Firehose {
 
     for (var package in changedPackages) {
       print('');
-      print('Validating ${_bold('package:${package.pubspec.name}')}');
+      print('Validating ${_bold('package:${package.name}')}');
 
       print('pubspec:');
-      print('  version: ${_bold(package.pubspec.version.toString())}');
+      var pubspecVersion = package.pubspec.version.toString();
+      print('  version: ${_bold(pubspecVersion)}');
       if (package.pubspec.autoPublishValue != null) {
         print('  auto_publish: ${package.pubspec.autoPublishValue}');
       }
@@ -56,9 +62,10 @@ class Firehose {
 
       print('changelog:');
       var changelogUpdated = files.contains('CHANGELOG.md');
+      var changelogVersion = package.changelog.latestVersion;
       if (changelogUpdated) {
-        if (package.changelog.latestVersion != null) {
-          print('  ## ${_bold(package.changelog.latestVersion)}');
+        if (changelogVersion != null) {
+          print('  ## ${_bold(changelogVersion)}');
         }
         for (var entry in package.changelog.latestChangeEntries) {
           print('  $entry');
@@ -76,11 +83,10 @@ class Firehose {
         issues++;
         _failure('No changelog update for this change.');
       }
-      if (package.pubspec.version.toString() !=
-          package.changelog.latestVersion) {
+      if (pubspecVersion != changelogVersion) {
         issues++;
-        _failure("pubspec version (${package.pubspec.version}) and "
-            "changelog (${package.changelog.latestVersion})don't agree.");
+        _failure("pubspec version ($pubspecVersion) and "
+            "changelog ($changelogVersion)don't agree.");
       }
       if (issues == 0) {
         print('No issues found.');
@@ -88,13 +94,12 @@ class Firehose {
     }
   }
 
-  // todo: figure out how to share code between verify() and publish()
+  // todo: share code between verify() and publish()
 
   void publish() async {
 // for the default branch:
 // - determine changed files
 // - determine affected packages
-// - validate that the pubspec version != a published version
 // - attempt to publish
 
     var git = Git();
@@ -105,7 +110,7 @@ class Firehose {
       print('- $file');
     }
 
-    var packages = Packages().locatePackages();
+    var packages = Repo().locatePackages();
     print('');
     print('Repository publishable packages:');
     for (var package in packages) {
@@ -118,10 +123,11 @@ class Firehose {
 
     for (var package in changedPackages) {
       print('');
-      print('Publishing ${_bold('package:${package.pubspec.name}')}');
+      print('Publishing ${_bold('package:${package.name}')}');
 
       print('pubspec:');
-      print('  version: ${_bold(package.pubspec.version.toString())}');
+      var pubspecVersion = package.pubspec.version.toString();
+      print('  version: ${_bold(pubspecVersion)}');
       if (package.pubspec.autoPublishValue != null) {
         print('  auto_publish: ${package.pubspec.autoPublishValue}');
       }
@@ -133,9 +139,10 @@ class Firehose {
 
       print('changelog:');
       var changelogUpdated = files.contains('CHANGELOG.md');
+      var changelogVersion = package.changelog.latestVersion;
       if (changelogUpdated) {
-        if (package.changelog.latestVersion != null) {
-          print('  ## ${_bold(package.changelog.latestVersion)}');
+        if (changelogVersion != null) {
+          print('  ## ${_bold(changelogVersion)}');
         }
         for (var entry in package.changelog.latestChangeEntries) {
           print('  $entry');
@@ -151,10 +158,9 @@ class Firehose {
       if (!changelogUpdated) {
         print('Note - no changelog update for this change.');
       }
-      if (package.pubspec.version.toString() !=
-          package.changelog.latestVersion) {
-        print("Note - pubspec version (${package.pubspec.version}) and "
-            "changelog (${package.changelog.latestVersion})don't agree.");
+      if (pubspecVersion != changelogVersion) {
+        print("Note - pubspec version ($pubspecVersion) and "
+            "changelog ($changelogVersion)don't agree.");
       }
 
       if (Platform.environment.containsKey('PUB_CREDENTIALS')) {
@@ -170,25 +176,35 @@ class Firehose {
         );
         credentialsFile.writeAsStringSync(oathCredentials);
 
-        print('dart pub publish --force');
-        var process = await Process.start(
+        var code = await stream(
           'dart',
-          ['pub', 'publish', '--force'],
-          workingDirectory: package.directory.path,
+          args: ['pub', 'publish', '--force'],
+          cwd: package.directory,
         );
-
-        process.stdout
-            .transform(utf8.decoder)
-            .transform(LineSplitter())
-            .listen((line) => stdout.writeln('  $line'));
-        process.stderr
-            .transform(utf8.decoder)
-            .transform(LineSplitter())
-            .listen((line) => stderr.writeln('  $line'));
-
-        var code = await process.exitCode;
         if (code != 0) {
           io.exitCode = code;
+        } else {
+          // Publishing was successful; tag the commit and push it upstream.
+
+          // Tag woth either <version> or <package>-v<version>.
+          String tag;
+          if (Repo().singlePackageRepo) {
+            tag = pubspecVersion;
+          } else {
+            tag = '${package.name}-v$pubspecVersion';
+          }
+
+          // Tag the commit.
+          var result = await stream('git', args: ['tag', tag]);
+          if (result != 0) {
+            io.exitCode = code;
+          } else {
+            // And push it upstream.
+            result = await stream('git', args: ['push', 'origin', tag]);
+            if (result != 0) {
+              io.exitCode = code;
+            }
+          }
         }
       } else {
         _failure('PUB_CREDENTIALS env variable not found; unable to publish.');
