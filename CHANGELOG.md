@@ -1,6 +1,5 @@
-## next
+## 0.2.0-dev.1
 
-- Support for non-valid semver versions pausing auto-publish.
 - Adjusted how github labels are passing into the script.
 - Added additional tests.
 

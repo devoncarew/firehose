@@ -129,9 +129,6 @@ class Firehose {
       if (!dryRun) {
         if (!packageChangesFiles.contains('pubspec.yaml')) {
           print('pubspec.yaml not changed; not attempting to publish.');
-        } else if (!package.pubspec.hasValidSemverVersion) {
-          print('pubspec.yaml version (${package.pubspec.version}) not a valid '
-              'semver value; not attempting to publish.');
         } else if (!env.containsKey('PUB_CREDENTIALS')) {
           _failure(
               'PUB_CREDENTIALS env variable not found; unable to publish.');
