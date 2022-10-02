@@ -62,11 +62,6 @@ class Firehose {
     print('');
     print('Found ${changedPackages.length} changed package(s).');
 
-    if (!env.containsKey(_pubEnvVar)) {
-      _failure('$_pubEnvVar env variable not found; the action will not be '
-          'able publish.');
-    }
-
     for (var package in changedPackages) {
       print('');
       var actionDescription = dryRun ? 'Validating' : 'Publishing';
