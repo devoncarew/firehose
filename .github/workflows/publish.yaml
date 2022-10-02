@@ -8,11 +8,10 @@ name: Publish
 
 on:
   push:
-    branches: 
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 jobs:
   auto-publish:
@@ -39,8 +38,11 @@ jobs:
       - name: Verify changed packages (publish dry-run)
         if: ${{ github.event_name == 'pull_request' }}
         run: dart bin/firehose.dart --verify
+        env:
+          PR_LABELS: "${{ toJson(github.event.pull_request.labels.*.name) }}"
 
       - name: Publish changed packages
         if: ${{ github.event_name == 'push' }}
         run: dart bin/firehose.dart --publish
-        env: {PUB_CREDENTIALS: "${{ secrets.PUB_CREDENTIALS }}"}
+        env:
+          PUB_CREDENTIALS: "${{ secrets.PUB_CREDENTIALS }}"
