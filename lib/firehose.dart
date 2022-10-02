@@ -80,10 +80,10 @@ class Firehose {
 
       var packageChangesFiles = package.matchingFiles(changedFiles);
 
-      print('changelog:');
       var changelogUpdated = packageChangesFiles.contains('CHANGELOG.md');
       var changelogVersion = package.changelog.latestVersion;
       if (changelogUpdated) {
+        print('changelog:');
         if (changelogVersion != null) {
           print('  ## ${_bold(changelogVersion)}');
         }
@@ -97,11 +97,9 @@ class Firehose {
         print('  $file');
       }
 
-      List<String> prLabels;
+      var prLabels = <String>[];
       if (env.containsKey('PR_LABELS')) {
         prLabels = (jsonDecode(env['PR_LABELS']!) as List).cast<String>();
-      } else {
-        prLabels = [];
       }
 
       var changelogExempt = prLabels.contains('changelog-exempt');
