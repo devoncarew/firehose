@@ -21,6 +21,8 @@ class Package {
     changelog = Changelog(File(path.join(directory.path, 'CHANGELOG.md')));
   }
 
+  String get name => pubspec.name;
+
   bool containsFile(String file) {
     return path.isWithin(directory.path, file);
   }
@@ -40,16 +42,29 @@ class Package {
   }
 }
 
-class Packages {
+class Repo {
+  /// Returns true if this repository hosts only a single package, and that
+  /// package lives at the top level of the repo.
+  bool get singlePackageRepo {
+    var packages = locatePackages();
+    if (packages.length != 1) {
+      return false;
+    }
+
+    var dir = packages.single.directory;
+    return dir.absolute.path == Directory.current.absolute.path;
+  }
+
   /// This will return all the potentially publishable packages for the current
   /// repository.
   ///
   /// This could be one package - if this is a single package repository - or
   /// multiple packages, if this is a monorepo.
   ///
-  /// Package will only be returned if their pubspec contains an 'auto-publish'
-  /// key. If that 'auto_publish' key is set to `false`, the package will still
-  /// be returned, but its Package.publishingEnabled flag will be false.
+  /// Packages will only be returned if their pubspec contains an 'auto-publish'
+  /// key with a value of `true`. If that 'auto_publish' key is set to `false`,
+  /// the package will still be returned, but its Package.publishingEnabled flag
+  /// will be false.
   List<Package> locatePackages() {
     return _recurseAndGather(Directory.current, []);
   }
