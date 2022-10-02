@@ -11,6 +11,9 @@ import 'src/utils.dart';
 // action configuration file (test/**, ...)
 
 class Firehose {
+  static const String _pubEnvVar = 'PUB_CREDENTIALS';
+  static const String _changelogExempt = 'changelog-exempt';
+
   final Directory directory;
 
   /// Whether to auto-publish pre-release pubspec versions.
@@ -59,6 +62,11 @@ class Firehose {
     print('');
     print('Found ${changedPackages.length} changed package(s).');
 
+    if (!env.containsKey(_pubEnvVar)) {
+      _failure('$_pubEnvVar env variable not found; the action will not be '
+          'able publish.');
+    }
+
     for (var package in changedPackages) {
       print('');
       var actionDescription = dryRun ? 'Validating' : 'Publishing';
@@ -93,11 +101,8 @@ class Firehose {
         print('  $file');
       }
 
-      var labels = <String>[];
-      if (env.containsKey('PR_LABELS')) {
-        labels = env['PR_LABELS']!.split('.');
-      }
-      var changelogExempt = labels.contains('changelog-exempt');
+      var labels = (env['PR_LABELS'] ?? '').split(',');
+      var changelogExempt = labels.contains(_changelogExempt);
 
       // checks
       if (dryRun) {
@@ -105,7 +110,7 @@ class Firehose {
         if (!changelogUpdated) {
           if (changelogExempt) {
             print("No changelog update for this change (ignoring due to "
-                "'changelog-exempt').");
+                "'$_changelogExempt').");
           } else {
             _failure('No changelog update for this change.');
             issues++;
@@ -116,12 +121,12 @@ class Firehose {
           _failure("pubspec version ($pubspecVersion) and "
               "changelog ($changelogVersion)don't agree.");
         }
-        if (package.pubspec.isPreRelease && !publishPreReleaseVersions) {
-          print('Note - pubspec version is a pre-release version '
-              '($pubspecVersion); package will not be published.');
-        }
         if (issues == 0) {
           print('No issues found.');
+        }
+        if (package.pubspec.isPreRelease && !publishPreReleaseVersions) {
+          print('Note - version ($pubspecVersion) is pre-release; package will '
+              'not be auto-published.');
         }
       } else {
         if (!changelogUpdated) {
@@ -137,15 +142,14 @@ class Firehose {
         if (!packageChangesFiles.contains('pubspec.yaml')) {
           print('pubspec.yaml not changed; not attempting to publish.');
         } else if (package.pubspec.isPreRelease && !publishPreReleaseVersions) {
-          print('pubspec version is a pre-release version ($pubspecVersion); '
-              'package will not be published.');
-        } else if (!env.containsKey('PUB_CREDENTIALS')) {
-          _failure(
-              'PUB_CREDENTIALS env variable not found; unable to publish.');
+          print('version ($pubspecVersion) is pre-release; package will not be '
+              'auto-published.');
+        } else if (!env.containsKey(_pubEnvVar)) {
+          _failure('$_pubEnvVar env variable not found; unable to publish.');
         } else {
           // Copy the pub oath information from the passed in environment
           // variable to a credentials file.
-          var oathCredentials = env['PUB_CREDENTIALS']!;
+          var oathCredentials = env[_pubEnvVar]!;
           var configDir = Directory(
             path.join(env['HOME']!, '.config', 'dart'),
           );
