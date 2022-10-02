@@ -11,6 +11,11 @@ void main() {
       changelog = Changelog(File('CHANGELOG.md'));
     });
 
+    test('exists', () {
+      var version = changelog.exists;
+      expect(version, isTrue);
+    });
+
     test('latestVersion', () {
       var version = changelog.latestVersion;
       expect(version, isNotNull);

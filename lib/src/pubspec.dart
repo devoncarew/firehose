@@ -26,11 +26,27 @@ class Pubspec {
   /// Return the package version.
   ///
   /// Returns null if no version is specified.
-  Version? get version {
-    var version = _yaml['version'] as String?;
+  String? get version => _yaml['version'] as String?;
+
+  /// Returns whether the 'version' field is populated with a valid semver
+  /// value.
+  bool get hasValidSemverVersion {
     if (version == null) {
-      return null;
+      return false;
     }
-    return Version.parse(version);
+    try {
+      semverVersion;
+      return true;
+    } on FormatException catch (_) {
+      return false;
+    }
+  }
+
+  /// Return the package version.
+  ///
+  /// Returns null if no version is specified. This will throw a FormatException
+  /// if the 'version' field is populated with an invalid semver value.
+  Version? get semverVersion {
+    return version == null ? null : Version.parse(version!);
   }
 }
