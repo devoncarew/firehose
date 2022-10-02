@@ -104,7 +104,7 @@ class Firehose {
         prLabels = [];
       }
 
-      var changelogExempt = prLabels.contains('changelog_exempt');
+      var changelogExempt = prLabels.contains('changelog-exempt');
 
       // checks
       if (dryRun) {
@@ -112,7 +112,7 @@ class Firehose {
         if (!changelogUpdated) {
           _failure('No changelog update for this change.');
           if (changelogExempt) {
-            print('  (ignoring due to changelog_exempt)');
+            print('  (ignoring due to changelog-exempt)');
           } else {
             issues++;
           }
