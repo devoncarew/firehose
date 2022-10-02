@@ -1,21 +1,23 @@
 import 'package:firehose/src/git.dart';
 import 'package:test/test.dart';
 
-// TODO:
-
 void main() {
   group('git', () {
-    // ignore: unused_local_variable
     late Git git;
 
     setUp(() {
       git = Git();
     });
 
-    // test('currentBranch', () {
-    //   var branch = git.currentBranch;
-    //   print('branch name: $branch');
-    //   expect(branch, isNotNull);
+    test('commitCount', () {
+      var count = git.commitCount;
+      expect(count, greaterThan(0));
+    });
+
+    // This will fail on github.
+    // test('getChangedFiles', () {
+    //   var result = git.getChangedFiles();
+    //   expect(result, isNotEmpty);
     // });
   });
 }

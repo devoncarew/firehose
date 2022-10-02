@@ -26,6 +26,15 @@ class Git {
     return (baseRef?.isNotEmpty ?? false) && (headRef?.isNotEmpty ?? false);
   }
 
+  /// Returns the number of git commits in the current branch.
+  int get commitCount {
+    var result = exec('git', args: ['rev-list', '--count', 'HEAD']);
+    if (result.exitCode != 0) {
+      return 0;
+    }
+    return int.tryParse(result.stdout.trim()) ?? 0;
+  }
+
   // todo: get the commit count on the current branch
   // git rev-list --count HEAD
 
@@ -79,7 +88,6 @@ class Git {
 
   /// Get the list of changed files for this PR or push to main.
   List<String> getChangedFiles({bool excludeTopLevelDotFiles = true}) {
-    // run: git diff --name-only HEAD HEAD~1
     var result = exec(
       'git',
       args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],

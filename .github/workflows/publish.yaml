@@ -4,8 +4,6 @@
 
 name: Publish
 
-# todo: support 'workflow_dispatch' to allow manually starting the action
-
 on:
   push:
     branches: [main]
@@ -15,15 +13,15 @@ on:
 
 jobs:
   auto-publish:
-    # todo: update
+    # Update this to the host GitHub org.
     if: github.repository_owner == 'devoncarew'
-    # Needed to push a tag back to the repo.
+    # This is needed to push tags back to the repo.
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
       # Checks out a copy of the repo. This fetches all commits in order to
-      # determine which files have changed.
+      # determine the changed files.
       - name: Check out repo
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
         with:
@@ -39,7 +37,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         run: dart bin/firehose.dart --verify
         env:
-          PR_LABELS: "${{ toJson(github.event.pull_request.labels.*.name) }}"
+          PR_LABELS: "${{ join(github.event.pull_request.labels.*.name) }}"
 
       - name: Publish changed packages
         if: ${{ github.event_name == 'push' }}

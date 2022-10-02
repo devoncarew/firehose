@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io' hide exitCode;
 import 'dart:io' as io show exitCode;
 
@@ -8,15 +7,8 @@ import 'package:path/path.dart' as path;
 import 'src/git.dart';
 import 'src/utils.dart';
 
-// todo: support having a github label which will disable validation? and also
-// disable publishing; `changelog-exempt`?
-
 // todo: support allowing the glob of files to ignore to be configurable in the
 // action configuration file (test/**, ...)
-
-// todo: don't try to publish for some pubspec version patterns? `-dev`?
-// `-next`? `-pre`? This would be for accumulating several changes. We could
-// also use 'auto_publish: false' or 'publish_to: none' for that.
 
 class Firehose {
   final Directory directory;
@@ -52,7 +44,8 @@ class Firehose {
       print('- $file');
     }
 
-    var packages = Repo().locatePackages();
+    var repo = Repo();
+    var packages = repo.locatePackages();
     print('');
     print('Repository publishable packages:');
     for (var package in packages) {
@@ -69,7 +62,7 @@ class Firehose {
       print('$actionDescription ${_bold('package:${package.name}')}');
 
       print('pubspec:');
-      var pubspecVersion = package.pubspec.version.toString();
+      var pubspecVersion = package.pubspec.version;
       print('  version: ${_bold(pubspecVersion)}');
       if (package.pubspec.autoPublishValue != null) {
         print('  auto_publish: ${package.pubspec.autoPublishValue}');
@@ -97,12 +90,11 @@ class Firehose {
         print('  $file');
       }
 
-      var prLabels = <String>[];
+      var labels = <String>[];
       if (env.containsKey('PR_LABELS')) {
-        prLabels = (jsonDecode(env['PR_LABELS']!) as List).cast<String>();
+        labels = env['PR_LABELS']!.split('.');
       }
-
-      var changelogExempt = prLabels.contains('changelog-exempt');
+      var changelogExempt = labels.contains('changelog-exempt');
 
       // checks
       if (dryRun) {
@@ -141,8 +133,8 @@ class Firehose {
           _failure(
               'PUB_CREDENTIALS env variable not found; unable to publish.');
         } else {
-          // Copy the pub oath information from the passed in environment variable
-          // to a credentials file.
+          // Copy the pub oath information from the passed in environment
+          // variable to a credentials file.
           var oathCredentials = env['PUB_CREDENTIALS']!;
           var configDir = Directory(
             path.join(env['HOME']!, '.config', 'dart'),
@@ -163,10 +155,10 @@ class Firehose {
           } else {
             // Publishing was successful; tag the commit and push it upstream.
 
-            // Tag woth either <version> or <package>-v<version>.
+            // Tag with either <version> or <package>-v<version>.
             String tag;
-            if (Repo().singlePackageRepo) {
-              tag = pubspecVersion;
+            if (repo.singlePackageRepo) {
+              tag = pubspecVersion!;
             } else {
               tag = '${package.name}-v$pubspecVersion';
             }
