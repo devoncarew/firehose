@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' hide exitCode;
 import 'dart:io' as io show exitCode;
 
@@ -96,15 +97,25 @@ class Firehose {
         print('  $file');
       }
 
-      print('PR_LABELS:');
-      print(env['PR_LABELS']);
+      List<String> prLabels;
+      if (env.containsKey('PR_LABELS')) {
+        prLabels = jsonDecode(env['PR_LABELS']!);
+      } else {
+        prLabels = [];
+      }
+
+      var changelogExempt = prLabels.contains('changelog_exempt');
 
       // checks
       if (dryRun) {
         var issues = 0;
         if (!changelogUpdated) {
-          issues++;
           _failure('No changelog update for this change.');
+          if (changelogExempt) {
+            print('  (ignoring due to changelog_exempt)');
+          } else {
+            issues++;
+          }
         }
         if (pubspecVersion != changelogVersion) {
           issues++;
