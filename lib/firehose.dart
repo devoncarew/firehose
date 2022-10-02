@@ -96,6 +96,9 @@ class Firehose {
         print('  $file');
       }
 
+      print('PR_LABELS:');
+      print(env['PR_LABELS']);
+
       // checks
       if (dryRun) {
         var issues = 0;
@@ -124,15 +127,15 @@ class Firehose {
       if (!dryRun) {
         if (!packageChangesFiles.contains('pubspec.yaml')) {
           print('pubspec.yaml not changed; not attempting to publish.');
-        } else if (!Platform.environment.containsKey('PUB_CREDENTIALS')) {
+        } else if (!env.containsKey('PUB_CREDENTIALS')) {
           _failure(
               'PUB_CREDENTIALS env variable not found; unable to publish.');
         } else {
           // Copy the pub oath information from the passed in environment variable
           // to a credentials file.
-          var oathCredentials = Platform.environment['PUB_CREDENTIALS']!;
+          var oathCredentials = env['PUB_CREDENTIALS']!;
           var configDir = Directory(
-            path.join(Platform.environment['HOME']!, '.config', 'dart'),
+            path.join(env['HOME']!, '.config', 'dart'),
           );
           configDir.createSync(recursive: true);
           var credentialsFile = File(
@@ -198,4 +201,6 @@ class Firehose {
   String _bold(String? message) {
     return '\u001b[1m$message\u001b[0m';
   }
+
+  Map<String, String> get env => Platform.environment;
 }
