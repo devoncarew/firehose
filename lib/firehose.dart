@@ -10,6 +10,11 @@ import 'src/utils.dart';
 // todo: support allowing the glob of files to ignore to be configurable in the
 // action configuration file (test/**, ...)
 
+// todo: do we want to use the convention that pre-prelease pubspec versions are
+// not published, or, use the convention that changes where the first changelog
+// entry is 'unreleased' are not published? 'unreleased' is much clearer from
+// the POV of knowing what's published or not when looking at the repo.
+
 class Firehose {
   static const String _pubEnvVar = 'PUB_CREDENTIALS';
   static const String _changelogExempt = 'changelog-exempt';
@@ -132,6 +137,9 @@ class Firehose {
               "changelog ($changelogVersion)don't agree.");
         }
       }
+
+      var summaryFile = File(env['GITHUB_STEP_SUMMARY']!);
+      summaryFile.writeAsStringSync('Hello - things are great!');
 
       if (!dryRun) {
         if (!packageChangesFiles.contains('pubspec.yaml')) {

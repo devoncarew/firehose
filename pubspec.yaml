@@ -9,6 +9,9 @@ auto_publish: true
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
+executables:
+  firehose: firehose
+
 dependencies:
   args: ^2.3.0
   path: ^1.8.0
