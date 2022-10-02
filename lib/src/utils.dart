@@ -37,7 +37,7 @@ class ExecResults {
 /// Execute the given CLI command asynchronously, streaming stdout and stderr to
 /// the console.
 ///
-/// This will also echo the command being to stdout, and indent the processes
+/// This will also echo the command being run to stdout and indent the processes
 /// output slightly.
 Future<int> stream(
   String command, {

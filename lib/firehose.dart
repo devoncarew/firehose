@@ -13,6 +13,9 @@ import 'src/utils.dart';
 class Firehose {
   final Directory directory;
 
+  /// Whether to auto-publish pre-release pubspec versions.
+  final bool publishPreReleaseVersions = false;
+
   Firehose(this.directory);
 
   void verify() async {
@@ -113,6 +116,10 @@ class Firehose {
           _failure("pubspec version ($pubspecVersion) and "
               "changelog ($changelogVersion)don't agree.");
         }
+        if (package.pubspec.isPreRelease && !publishPreReleaseVersions) {
+          print('Note - pubspec version is a pre-release version '
+              '($pubspecVersion); package will not be published.');
+        }
         if (issues == 0) {
           print('No issues found.');
         }
@@ -129,6 +136,9 @@ class Firehose {
       if (!dryRun) {
         if (!packageChangesFiles.contains('pubspec.yaml')) {
           print('pubspec.yaml not changed; not attempting to publish.');
+        } else if (package.pubspec.isPreRelease && !publishPreReleaseVersions) {
+          print('pubspec version is a pre-release version ($pubspecVersion); '
+              'package will not be published.');
         } else if (!env.containsKey('PUB_CREDENTIALS')) {
           _failure(
               'PUB_CREDENTIALS env variable not found; unable to publish.');

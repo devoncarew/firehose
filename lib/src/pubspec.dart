@@ -17,6 +17,10 @@ class Pubspec {
   /// Return the package name.
   String get name => _yaml['name'];
 
+  /// Returns whether the pubspec semver version is a pre-release version
+  /// (`'1.2.3-foo'`).
+  bool get isPreRelease => semverVersion?.isPreRelease ?? false;
+
   /// Return the `'auto_publish'`, if any.
   Object? get autoPublishValue => _yaml['auto_publish'];
 
