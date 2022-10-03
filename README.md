@@ -62,7 +62,7 @@ For a merge into the default branch, this tool:
 - determines changed files
 - determines affected packages
 - attempts to publish
-- tags the commit and push the tag
+- tags the commit and pushes the tag
 
 ## Mono-repos
 
