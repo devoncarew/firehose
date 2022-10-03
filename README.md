@@ -4,7 +4,7 @@
 
 ## What's this?
 
-This is a tool to automate publishing pub packages from GitHub actions.
+This is a tool to automate publishing of pub packages from GitHub actions.
 
 ## Status
 

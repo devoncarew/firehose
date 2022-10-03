@@ -26,6 +26,7 @@ class Firehose {
 
   Firehose(this.directory);
 
+  /// Verify the packages in the repository.
   void verify() async {
     // for a PR:
     //   - determine changed files
@@ -36,6 +37,7 @@ class Firehose {
     await _publish(dryRun: true);
   }
 
+  /// Publish the changed packages in the repository.
   void publish() async {
     // for the default branch:
     //   - determine changed files
