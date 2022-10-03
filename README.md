@@ -4,7 +4,7 @@
 
 ## What's this?
 
-This is a tool to automate publishing pub packages from GitHub actions.
+This is a tool to automate publishing of pub packages from GitHub actions.
 
 ## Status
 
@@ -24,7 +24,7 @@ Additionally:
 - each PR should add a new entry to the changelog
 - the changelog version and pubspec version should agree
 
-## Skipping changelog validation PR
+## Skipping changelog validation for a PR
 
 To skip the package validation for a PR, add a `changelog-exempt` label to the
 PR. This should only be used for trivial changes that are not in any way user
@@ -34,9 +34,9 @@ facing.
 
 Pre-release versions (aka, `'1.2.3-foo'`) are handled specially; this tool
 will validate the package changes, but will not auto-publish the package. This
-can be used to accumulate several changes and later publish them together. When
-the version is later changes to a stable (or build) version (above, `'1.2.3`),
-the tool will publish that verion.
+can be used to accumulate several changes and later publish them as a group.
+When the version later changes to a stable version (above, `'1.2.3`), the tool
+will publish that verion.
 
 ## Disabling off auto-publishing
 
@@ -48,17 +48,21 @@ There are several ways to turn off auto-publishing; this includes:
 
 ## PR branch actions
 
-- determine changed files
-- determine affected packages
-- validate that there's a changelog entry
-- validate that the changelog version == the pubspec version
+For a PR, this tool:
+
+- determines changed files
+- determines affected packages
+- validates that there's a changelog entry
+- validates that the changelog version == the pubspec version
 
 ## Default branch actions
 
-- determine changed files
-- determine affected packages
-- attempt to publish
-- tag the commit and push the tag
+For a merge into the default branch, this tool:
+
+- determines changed files
+- determines affected packages
+- attempts to publish
+- tags the commit and push the tag
 
 ## Mono-repos
 
@@ -73,10 +77,10 @@ name and version (i.e., `foo-v1.2.3`).
 
 ## Integrating this tool into a repo
 
-- create a `PUB_CREDENTIALS` action 'Repository secret' on your repo; this should
+- create a repository secret on your repo called `PUB_CREDENTIALS`; this should
   contain the contents of your Pub oauth credentials file
-- configure your repo to squash commits when merging PRs (otherwise this action will
-  run for each separate commit in a PR when merged)
+- configure your repo to squash commits when merging PRs; otherwise this action
+  will run for each separate commit in a PR when merged
 - copy the .github/workflows/publish.yaml file to your repo
 - update that file to invoke this tool via pub global activate (i.e.,
   `dart pub global activate firehose`; `dart pub global run firehose`)

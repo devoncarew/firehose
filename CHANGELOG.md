@@ -1,3 +1,7 @@
+## 0.2.1
+
+- Update documentation text.
+
 ## 0.2.0
 
 - Added a option to not publish pre-release packages; auto-publishing will only
