@@ -30,18 +30,21 @@ jobs:
       - name: Set up Dart
         uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
 
+      # For other repos, this should be `dart pub global activate firehose`
       - name: Pub get
         run: dart pub get
 
+      # For other repos, this should be `dart pub global run firehose`
       - name: Verify changed packages (publish dry-run)
         if: ${{ github.event_name == 'pull_request' }}
-        run: dart bin/firehose.dart --verify
+        run: dart pub run firehose --verify
         env:
           PR_LABELS: "${{ join(github.event.pull_request.labels.*.name) }}"
 
+      # For other repos, this should be `dart pub global run firehose`
       - name: Publish changed packages
         if: ${{ github.event_name == 'push' }}
-        run: dart bin/firehose.dart --publish
+        run: dart pub run firehose --publish
         env:
           # Note: this must exist as an action 'Repository secret' on the repo.
           PUB_CREDENTIALS: "${{ secrets.PUB_CREDENTIALS }}"
