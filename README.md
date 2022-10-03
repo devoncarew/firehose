@@ -38,7 +38,7 @@ can be used to accumulate several changes and later publish them as a group.
 When the version later changes to a stable version (above, `'1.2.3`), the tool
 will publish that verion.
 
-## Disabling off auto-publishing
+## Disabling auto-publishing
 
 There are several ways to turn off auto-publishing; this includes:
 
