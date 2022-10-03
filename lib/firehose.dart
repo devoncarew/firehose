@@ -49,6 +49,9 @@ class Firehose {
   Future<void> _publish({required bool dryRun}) async {
     var git = Git();
 
+    // TODO: validate that we can retrieve the git commit information here
+    // (i.e., git.commitCount > 0)
+
     var changedFiles = git.getChangedFiles();
     print('Repository changed files:');
     for (var file in changedFiles) {
@@ -137,9 +140,6 @@ class Firehose {
               "changelog ($changelogVersion)don't agree.");
         }
       }
-
-      var summaryFile = File(env['GITHUB_STEP_SUMMARY']!);
-      summaryFile.writeAsStringSync('Hello - things are great!');
 
       if (!dryRun) {
         if (!packageChangesFiles.contains('pubspec.yaml')) {

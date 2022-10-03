@@ -43,4 +43,5 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: dart bin/firehose.dart --publish
         env:
+          # Note: this must exist as an action 'Repository secret' on the repo.
           PUB_CREDENTIALS: "${{ secrets.PUB_CREDENTIALS }}"

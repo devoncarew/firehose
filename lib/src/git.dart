@@ -35,9 +35,6 @@ class Git {
     return int.tryParse(result.stdout.trim()) ?? 0;
   }
 
-  // todo: get the commit count on the current branch
-  // git rev-list --count HEAD
-
   /// The name of the event that triggered the workflow. For example,
   /// `workflow_dispatch`.
   String? get eventName {
