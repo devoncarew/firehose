@@ -1,6 +1,6 @@
 name: firehose
 description: A tool to automate publishing of Pub packages from GitHub actions.
-version: 0.2.1
+version: 0.2.2
 repository: https://github.com/devoncarew/firehose
 
 # Property to allow auto-publishing from the default branch.
