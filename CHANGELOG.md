@@ -1,3 +1,7 @@
+## 0.3.0+1
+
+- Fixes to the publish workflow.
+
 ## 0.3.0
 
 - Updates to the tool to support the new Pub features around publishing from
