@@ -40,10 +40,10 @@ jobs:
 
       # For other repos, this should be `dart pub global run firehose`
       - name: Verify changed packages (publish dry-run)
-        if: ${{ github.event_name == 'pull_request' }}
         run: dart pub run firehose --verify
         env:
           PR_LABELS: "${{ join(github.event.pull_request.labels.*.name) }}"
+<<<<<<< HEAD
 
       # TODO: pass in the tag we're attempting to publish
 
@@ -51,3 +51,5 @@ jobs:
       - name: Publish changed packages
         if: ${{ github.event_name == 'push' }}
         run: dart pub run firehose --publish
+=======
+>>>>>>> 6e8484f (updates to support the new pub publishing support (#22))

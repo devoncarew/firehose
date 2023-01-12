@@ -176,6 +176,20 @@ class Firehose {
           );
           if (code != 0) {
             io.exitCode = code;
+          } else {
+            // Publishing was successful; tag the commit and push it upstream.
+
+            // Tag with either <version> or <package>-v<version>.
+            var result = await stream('git', args: ['tag', repoTag]);
+            if (result != 0) {
+              io.exitCode = code;
+            } else {
+              // And push it upstream.
+              result = await stream('git', args: ['push', 'origin', repoTag]);
+              if (result != 0) {
+                io.exitCode = code;
+              }
+            }
           }
         }
       }
