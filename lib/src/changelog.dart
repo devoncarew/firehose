@@ -32,6 +32,17 @@ class Changelog {
 
     return sections;
   }
+
+  String get describeLatestChanges {
+    var buf = StringBuffer();
+    if (latestVersion != null) {
+      buf.writeln('### $latestVersion');
+    }
+    for (var entry in latestChangeEntries) {
+      buf.writeln(entry);
+    }
+    return buf.toString();
+  }
 }
 
 class _Section {

@@ -44,7 +44,7 @@ There are several ways to turn off auto-publishing; this includes:
 
 - changing the `auto_publish` value in the pubspec to any value other than
 `true`
-- adding a `publish-to: none` value to your pubspec
+- adding a `publish_to: none` value to your pubspec
 
 ## PR branch actions
 
@@ -66,12 +66,14 @@ For a merge into the default branch, this tool:
 
 ## Mono-repos
 
+todo: update docs re: tagging
+
 This tool can work with either single package repos or with mono-repos (repos
 containing several packages). It will scan for and detect any package which
 has the `auto_publish: true` property set in its pubspec.
 
 After a successful publish, for single package repos, the commit will be tagged
-with the package version (i.e., `1.2.3`). For mono-repos, in order to differentiate
+with the package version (i.e., `v1.2.3`). For mono-repos, in order to differentiate
 between other packages in the repo, the commit will be tagged with the package
 name and version (i.e., `foo-v1.2.3`).
 
