@@ -1,3 +1,8 @@
+## 0.3.0
+
+- Updates to the tool to support the new Pub features around publishing from
+  GitHub Actions.
+
 ## 0.2.2
 
 - Documentation fix.

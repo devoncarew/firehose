@@ -9,9 +9,19 @@ class Pubspec {
   late Map _yaml;
 
   Pubspec(this.directory) {
-    _yaml = yaml.loadYaml(
-            File(path.join(directory.path, 'pubspec.yaml')).readAsStringSync())
-        as Map;
+    _yaml = yaml.loadYaml(File(localFilePath).readAsStringSync()) as Map;
+  }
+
+  String get localFilePath {
+    var p = path.join(directory.path, 'pubspec.yaml');
+    return path.relative(p);
+  }
+
+  int? get versionLine {
+    var lines = File(localFilePath).readAsLinesSync();
+    lines = lines.map((line) => line.split(':').first.trim()).toList();
+    var index = lines.indexOf('name');
+    return index == -1 ? null : index;
   }
 
   /// Return the package name.

@@ -16,12 +16,10 @@ void main(List<String> arguments) {
 
     var verify = argResults['verify'] == true;
     var publish = argResults['publish'] == true;
-    var verifyOrPublish = argResults['verify-or-publish'] == true;
 
-    if (!verify && !publish && !verifyOrPublish) {
+    if (!verify && !publish) {
       _usage(argParser,
-          error: 'Error: one of --verify, --publish, or --verify-or-publish '
-              'must be specified.');
+          error: 'Error: one of --verify or --publish must be specified.');
       exit(1);
     }
 
@@ -31,14 +29,6 @@ void main(List<String> arguments) {
           error: 'Error: --publish can only be executed from within a GitHub '
               'action.');
       exit(1);
-    }
-
-    if (verifyOrPublish) {
-      if (!git.inGithubContext || git.onGithubPR) {
-        verify = true;
-      } else {
-        publish = true;
-      }
     }
 
     var firehose = Firehose(Directory.current);
@@ -82,12 +72,5 @@ ArgParser _createArgs() {
       'publish',
       negatable: false,
       help: 'Publish any changed packages.',
-    )
-    ..addFlag(
-      'verify-or-publish',
-      negatable: false,
-      help:
-          'Auto-detect the corrent behavior; on a PR, run --verify; on a merge '
-          'into the default branch, run --publish.',
     );
 }

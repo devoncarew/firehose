@@ -61,7 +61,7 @@ class Repo {
   /// This could be one package - if this is a single package repository - or
   /// multiple packages, if this is a monorepo.
   ///
-  /// Packages will only be returned if their pubspec contains an 'auto-publish'
+  /// Packages will only be returned if their pubspec contains an 'auto_publish'
   /// key with a value of `true`. If that 'auto_publish' key is set to `false`,
   /// the package will still be returned, but its Package.publishingEnabled flag
   /// will be false.
@@ -92,5 +92,13 @@ class Repo {
     }
 
     return packages;
+  }
+
+  String calculateRepoTag(Package package) {
+    if (singlePackageRepo) {
+      return 'v${package.pubspec.version}';
+    } else {
+      return '${package.name}-v${package.pubspec.version}';
+    }
   }
 }
