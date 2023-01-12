@@ -24,10 +24,9 @@ class Github {
   void emitFileNoticeMarker({
     required String file,
     required int line,
-    required String title,
     required String message,
   }) {
     // ::notice file={name},line={line},endLine={endLine},title={title}::{message}
-    print('::notice file=$file,line=$line,title=$title::$message');
+    print('::notice file=$file,line=$line::$message');
   }
 }

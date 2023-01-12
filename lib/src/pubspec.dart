@@ -20,7 +20,7 @@ class Pubspec {
   int? get versionLine {
     var lines = File(localFilePath).readAsLinesSync();
     lines = lines.map((line) => line.split(':').first.trim()).toList();
-    var index = lines.indexOf('name');
+    var index = lines.indexOf('version');
     return index == -1 ? null : index;
   }
 

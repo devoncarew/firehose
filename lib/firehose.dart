@@ -92,12 +92,7 @@ class Firehose {
       var changelogVersion = package.changelog.latestVersion;
       if (changelogUpdated) {
         print('changelog:');
-        if (changelogVersion != null) {
-          print('  ## ${_bold(changelogVersion)}');
-        }
-        for (var entry in package.changelog.latestChangeEntries) {
-          print('  $entry');
-        }
+        print(package.changelog.describeLatestChanges);
       }
 
       print('changed files:');
@@ -134,20 +129,21 @@ class Firehose {
                 'not be auto-published.';
 
             print(message);
-            github.appendStepSummary(package.name, message);
+            github.appendStepSummary('package:${package.name}', message);
           } else {
             var message =
-                "Once this change lands in the default branch, tagging "
-                "the commit with '$repoTag' will trigger a publish.";
+                "After merging, tag with '$repoTag' to trigger a publish.";
 
             print('No issues found.\n$message');
-            github.appendStepSummary(package.name, message);
+            github.appendStepSummary(
+              'package:${package.name}',
+              '$message\n\n${package.changelog.describeLatestChanges}',
+            );
 
             if (package.pubspec.versionLine != null) {
               github.emitFileNoticeMarker(
                 file: package.pubspec.localFilePath,
                 line: package.pubspec.versionLine!,
-                title: 'Auto publish',
                 message: message,
               );
             }
