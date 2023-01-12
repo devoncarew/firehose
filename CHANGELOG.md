@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 ## 0.3.0+1
 
 - Fixes to the publish workflow.
 
+=======
+>>>>>>> 6e8484f (updates to support the new pub publishing support (#22))
 ## 0.3.0
 
 - Updates to the tool to support the new Pub features around publishing from
