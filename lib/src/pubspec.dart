@@ -21,7 +21,7 @@ class Pubspec {
     var lines = File(localFilePath).readAsLinesSync();
     lines = lines.map((line) => line.split(':').first.trim()).toList();
     var index = lines.indexOf('version');
-    return index == -1 ? null : index;
+    return index == -1 ? null : index + 1;
   }
 
   /// Return the package name.

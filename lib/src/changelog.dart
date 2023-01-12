@@ -36,7 +36,7 @@ class Changelog {
   String get describeLatestChanges {
     var buf = StringBuffer();
     if (latestVersion != null) {
-      buf.writeln('## $latestVersion}');
+      buf.writeln('### $latestVersion');
     }
     for (var entry in latestChangeEntries) {
       buf.writeln(entry);
