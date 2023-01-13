@@ -1,3 +1,7 @@
+## 0.3.0+3
+
+- Version rev to re-trigger publishing.
+
 ## 0.3.0+2
 
 - Adjust the trigger criteria for publishes.
