@@ -1,3 +1,7 @@
+## 0.3.2+1
+
+- Update the documentation in the readme.
+
 ## 0.3.2
 
 - Change the publishing logic to require git tags to publish (`v1.2.3` or for

@@ -6,37 +6,28 @@
 
 This is a tool to automate publishing of pub packages from GitHub actions.
 
-## Status
+## Conventions and setup
 
-This is very much still a work in progress! This is not yet recommended for
-production services.
+When run from a PR branch, this tool will validate the changed files, pubspecs,
+and changelogs, and indicate whether the criteria for publishing has been met.
 
-## Conventions
+When run in reponse to a git tag event (a tag with a pattern like `v1.2.3` or
+`name_v1.2.3` for monorepos), this tool will publish the indicated package.
 
-- pubspecs should contain an `auto_publish: true` property in order for this
-  tool to attempt to auto-publish
-- when run from a PR branch, this tool will validate the changed files, pubspecs,
-  and changelogs, and indicate whether the criteria for publishing has been met
-- when run from a merge into the default branch, this tool will attempt to
-  publish any packages which have had changed files
-
-Additionally:
-- each PR should add a new entry to the changelog
-- the changelog version and pubspec version should agree
+Pubspecs should contain an `auto_publish: true` property in order for this tool
+to attempt to auto-publish. Additionally, each PR should add a new entry to the
+changelog and the changelog version and pubspec version should agree.
 
 ## Skipping changelog validation for a PR
 
 To skip the package validation for a PR, add a `changelog-exempt` label to the
-PR. This should only be used for trivial changes that are not in any way user
-facing.
+PR. This should only be used for trivial changes that are not user facing.
 
 ## Pre-release versions
 
-Pre-release versions (aka, `'1.2.3-foo'`) are handled specially; this tool
+Pre-release versions (aka, `'1.2.3-dev'`) are handled specially; this tool
 will validate the package changes, but will not auto-publish the package. This
 can be used to accumulate several changes and later publish them as a group.
-When the version later changes to a stable version (above, `'1.2.3`), the tool
-will publish that verion.
 
 ## Disabling auto-publishing
 
@@ -52,17 +43,16 @@ For a PR, this tool:
 
 - determines changed files
 - determines affected packages
-- validates that there's a changelog entry
-- validates that the changelog version == the pubspec version
+- validates that there is a changelog entry
+- validates that the changelog version equals the pubspec version
 
-## Default branch actions
+## Git tag actions
 
-For a merge into the default branch, this tool:
+In reponse to a git tag event, this tool:
 
-- determines changed files
-- determines affected packages
-- attempts to publish
-- tags the commit and pushes the tag
+- validate the tag is well-formed
+- determines the indicated package
+- attempts to publish that package
 
 ## Mono-repos
 
@@ -70,17 +60,12 @@ This tool can work with either single package repos or with mono-repos (repos
 containing several packages). It will scan for and detect any package which
 has the `auto_publish: true` property set in its pubspec.
 
-<!-- After a successful publish, for single package repos, the commit will be tagged
-with the package version (i.e., `v1.2.3`). For mono-repos, in order to differentiate
-between other packages in the repo, the commit will be tagged with the package
-name and version (i.e., `foo-v1.2.3`). -->
+For single package repos, the tag pattern should be `v1.2.3`. For mono-repos,
+the tage pattern be prefixed with the package name, e.g. `foo-v1.2.3`.
 
 ## Integrating this tool into a repo
 
-- create a repository secret on your repo called `PUB_CREDENTIALS`; this should
-  contain the contents of your Pub oauth credentials file
-- configure your repo to squash commits when merging PRs; otherwise this action
-  will run for each separate commit in a PR when merged
 - copy the .github/workflows/publish.yaml file to your repo
 - update that file to invoke this tool via pub global activate (i.e.,
   `dart pub global activate firehose`; `dart pub global run firehose`)
+- update your package pubspecs to include `auto_publish: true`
