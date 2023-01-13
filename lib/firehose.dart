@@ -1,6 +1,7 @@
 import 'dart:io' hide exitCode;
 import 'dart:io' as io show exitCode;
 
+import 'package:collection/collection.dart';
 import 'package:firehose/src/repo.dart';
 
 import 'src/git.dart';
@@ -25,25 +26,35 @@ class Firehose {
     //   - validate that there's a changelog entry
     //   - validate that the changelog version == the pubspec version
 
-    await _publish(dryRun: true);
+    try {
+      await _verify();
+    } on _Fail {
+      if (io.exitCode == 0) {
+        io.exitCode = 1;
+      }
+    }
   }
 
   /// Publish the changed packages in the repository.
   Future publish() async {
-    // for the default branch:
-    //   - determine changed files
-    //   - determine affected packages
-    //   - attempt to publish
+    // for tagged commits:
+    //   - validate the tag
+    //   - validate the package exists
+    //   - validate changelog and pubspec versions
+    //   - publish
 
-    await _publish(dryRun: false);
+    try {
+      await _publish();
+    } on _Fail {
+      if (io.exitCode == 0) {
+        io.exitCode = 1;
+      }
+    }
   }
 
-  Future<void> _publish({required bool dryRun}) async {
+  Future<void> _verify() async {
     var git = Git();
     var github = Github();
-
-    // TODO: validate that we can retrieve the git commit information here
-    // (i.e., git.commitCount > 0)
 
     var changedFiles = git.getChangedFiles();
     print('Repository changed files:');
@@ -67,8 +78,7 @@ class Firehose {
       var repoTag = repo.calculateRepoTag(package);
 
       print('');
-      var actionDescription = dryRun ? 'Validating' : 'Publishing';
-      print('$actionDescription ${_bold('package:${package.name}')}');
+      print('Validating ${_bold('package:${package.name}')}');
 
       print('pubspec:');
       var pubspecVersion = package.pubspec.version;
@@ -98,103 +108,131 @@ class Firehose {
       var changelogExempt = labels.contains(_changelogExempt);
 
       // checks
-      if (dryRun) {
-        var issues = 0;
-
-        if (!changelogUpdated) {
-          if (changelogExempt) {
-            print("No changelog update for this change (ignoring due to "
-                "'$_changelogExempt').");
-          } else {
-            _failure("No changelog update for this change. If you believe this "
-                "PR is exempt, add the '$_changelogExempt' label to skip the "
-                "changelog check.");
-            issues++;
-          }
-        }
-        if (pubspecVersion != changelogVersion) {
-          _failure("pubspec version ($pubspecVersion) and "
-              "changelog ($changelogVersion)don't agree.");
-          issues++;
-        }
-
-        if (issues == 0) {
-          if (package.pubspec.isPreRelease) {
-            var message =
-                'Note - version ($pubspecVersion) is pre-release; package will '
-                'not be auto-published.';
-
-            print(message);
-            github.appendStepSummary('package:${package.name}', message);
-          } else {
-            var message =
-                "After merging, tag with '$repoTag' to trigger a publish.";
-
-            print('No issues found.\n$message');
-            github.appendStepSummary(
-              'package:${package.name}',
-              '$message\n\n${package.changelog.describeLatestChanges}',
-            );
-
-            if (package.pubspec.versionLine != null) {
-              github.emitFileNoticeMarker(
-                file: package.pubspec.localFilePath,
-                line: package.pubspec.versionLine!,
-                message: message,
-              );
-            }
-          }
-        }
-      } else {
-        if (!changelogUpdated) {
-          print('Note - no changelog update for this change.');
-        }
-        if (pubspecVersion != changelogVersion) {
-          print("Note - pubspec version ($pubspecVersion) and "
-              "changelog ($changelogVersion)don't agree.");
-        }
-      }
-
-      if (!dryRun) {
-        var result = await stream(
-          'dart',
-          args: ['pub', 'get'],
-          cwd: package.directory,
-        );
-        if (result != 0) {
-          io.exitCode = result;
-        }
-
-        if (!packageChangesFiles.contains('pubspec.yaml')) {
-          print('pubspec.yaml not changed; not attempting to publish.');
-        } else if (package.pubspec.isPreRelease) {
-          print('version ($pubspecVersion) is pre-release; package will not be '
-              'auto-published.');
+      if (!changelogUpdated) {
+        if (changelogExempt) {
+          print("No changelog update for this change (ignoring due to "
+              "'$_changelogExempt').");
         } else {
-          var code = await stream(
-            'dart',
-            args: ['pub', 'publish', '--force'],
-            cwd: package.directory,
-          );
-          if (code != 0) {
-            io.exitCode = code;
-          } else {
-            // Publishing was successful; tag the commit and push it upstream.
-
-            // Tag with either <version> or <package>-v<version>.
-            var result = await stream('git', args: ['tag', repoTag]);
-            if (result != 0) {
-              io.exitCode = code;
-            } else {
-              // And push it upstream.
-              result = await stream('git', args: ['push', 'origin', repoTag]);
-              if (result != 0) {
-                io.exitCode = code;
-              }
-            }
-          }
+          _fail("No changelog update for this change. If you believe this "
+              "PR is exempt, add the '$_changelogExempt' label to skip the "
+              "changelog check.");
         }
       }
+      if (pubspecVersion != changelogVersion) {
+        _fail("pubspec version ($pubspecVersion) and changelog "
+            "($changelogVersion) don't agree.");
+      }
+
+      if (package.pubspec.isPreRelease) {
+        var message =
+            'Note - version ($pubspecVersion) is pre-release; package will '
+            'not be auto-published.';
+
+        print(message);
+        github.appendStepSummary('package:${package.name}', message);
+      } else {
+        var message =
+            "After merging, tag with '$repoTag' to trigger a publish.";
+
+        print('No issues found.\n$message');
+        github.appendStepSummary(
+          'package:${package.name}',
+          '$message\n\n${package.changelog.describeLatestChanges}',
+        );
+
+        if (package.pubspec.versionLine != null) {
+          github.emitFileNoticeMarker(
+            file: package.pubspec.localFilePath,
+            line: package.pubspec.versionLine!,
+            message: message,
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _publish() async {
+    var git = Git();
+
+    // Validate the git tag.
+    var tag = git.refName;
+    if (tag == null) {
+      _fail('Git tag not found.');
+    }
+    var parsedTag = Tag(tag);
+    if (!parsedTag.valid) {
+      _fail("Git tag not in expected format: '$tag'");
+    }
+
+    var repo = Repo();
+    var packages = repo.locatePackages();
+    print('');
+    print('Repository publishable packages:');
+    for (var package in packages) {
+      print('  $package');
+    }
+
+    // Find package to publish.
+    Package? package;
+    if (repo.singlePackageRepo) {
+      if (packages.isEmpty) {
+        _fail('No publishable package found.');
+      }
+      package = packages.first;
+    } else {
+      var name = parsedTag.package;
+      if (name == null) {
+        _fail("Tag does not include package name ('$tag').");
+      }
+      package = packages.firstWhereOrNull((p) => p.name == name);
+      if (package == null) {
+        _fail("Tag does not match a repo package ('$tag').");
+      }
+    }
+
+    print('');
+    print('Publishing ${_bold('package:${package.name}')}');
+
+    print('pubspec:');
+    var pubspecVersion = package.pubspec.version;
+    print('  version: ${_bold(pubspecVersion)}');
+    if (package.pubspec.autoPublishValue != null) {
+      print('  auto_publish: ${package.pubspec.autoPublishValue}');
+    }
+    if (package.pubspec.publishToValue != null) {
+      print('  publish_to: ${package.pubspec.publishToValue}');
+    }
+
+    print('changelog:');
+    print(package.changelog.describeLatestChanges);
+    var changelogVersion = package.changelog.latestVersion;
+
+    if (pubspecVersion != parsedTag.version) {
+      _fail(
+          "Pubspec version ($pubspecVersion) and git tag ($tag) don't agree.");
+    }
+
+    if (pubspecVersion != changelogVersion) {
+      _fail("Pubspec version ($pubspecVersion) and changelog version "
+          "($changelogVersion) don't agree.");
+    }
+
+    var result = await stream(
+      'dart',
+      args: ['pub', 'get'],
+      cwd: package.directory,
+    );
+    if (result != 0) {
+      io.exitCode = result;
+    }
+
+    var code = await stream(
+      'dart',
+      args: ['pub', 'publish', '--force'],
+      cwd: package.directory,
+    );
+    if (code != 0) {
+      io.exitCode = code;
     }
   }
 
@@ -213,9 +251,9 @@ class Firehose {
     return results.toList();
   }
 
-  void _failure(String message) {
+  Never _fail(String message) {
     print('\u001b[31merror: $message\u001b[0m');
-    io.exitCode = 1;
+    throw _Fail();
   }
 
   String _bold(String? message) {
@@ -224,3 +262,5 @@ class Firehose {
 
   Map<String, String> get env => Platform.environment;
 }
+
+class _Fail implements Exception {}

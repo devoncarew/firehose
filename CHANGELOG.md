@@ -1,3 +1,8 @@
+## 0.3.2
+
+- Change the publishing logic to require git tags to publish (`v1.2.3` or for
+  mono-repos, `foobar_v1.2.3`).
+
 ## 0.3.1
 
 - Adjust the 'no changelog entry' message to indicate the label to apply to

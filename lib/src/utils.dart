@@ -63,3 +63,30 @@ Future<int> stream(
 
   return process.exitCode;
 }
+
+class Tag {
+  static final RegExp packageVersionTag =
+      RegExp(r'(\S+)_v(\d+\.\d+\.\d+(\+.*)?)');
+
+  static final RegExp packageTag = RegExp(r'v(\d+\.\d+\.\d+(\+.*)?)');
+
+  final String tag;
+
+  Tag(this.tag);
+
+  bool get valid => version != null;
+
+  String? get package {
+    var match = packageVersionTag.firstMatch(tag);
+    return match?.group(1);
+  }
+
+  String? get version {
+    var match = packageVersionTag.firstMatch(tag);
+    if (match != null) {
+      return match.group(2);
+    }
+    match = packageTag.firstMatch(tag);
+    return match?.group(1);
+  }
+}

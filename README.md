@@ -66,16 +66,14 @@ For a merge into the default branch, this tool:
 
 ## Mono-repos
 
-todo: update docs re: tagging
-
 This tool can work with either single package repos or with mono-repos (repos
 containing several packages). It will scan for and detect any package which
 has the `auto_publish: true` property set in its pubspec.
 
-After a successful publish, for single package repos, the commit will be tagged
+<!-- After a successful publish, for single package repos, the commit will be tagged
 with the package version (i.e., `v1.2.3`). For mono-repos, in order to differentiate
 between other packages in the repo, the commit will be tagged with the package
-name and version (i.e., `foo-v1.2.3`).
+name and version (i.e., `foo-v1.2.3`). -->
 
 ## Integrating this tool into a repo
 

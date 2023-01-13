@@ -4,7 +4,7 @@ import 'package:args/args.dart';
 import 'package:firehose/firehose.dart';
 import 'package:firehose/src/git.dart';
 
-void main(List<String> arguments) {
+void main(List<String> arguments) async {
   var argParser = _createArgs();
   try {
     var argResults = argParser.parse(arguments);
@@ -34,9 +34,9 @@ void main(List<String> arguments) {
     var firehose = Firehose(Directory.current);
 
     if (verify) {
-      firehose.verify();
+      await firehose.verify();
     } else {
-      firehose.publish();
+      await firehose.publish();
     }
   } on ArgParserException catch (e) {
     _usage(argParser, error: e.message);
