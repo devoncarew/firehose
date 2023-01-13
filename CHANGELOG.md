@@ -1,3 +1,7 @@
+## 0.3.0+2
+
+- Adjust the trigger criteria for publishes.
+
 ## 0.3.0+1
 
 - Fixes to the publish workflow.
