@@ -1,3 +1,8 @@
+## 0.3.1
+
+- Adjust the 'no changelog entry' message to indicate the label to apply to
+  skip the check.
+
 ## 0.3.0+3
 
 - Version rev to re-trigger publishing.
