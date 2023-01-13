@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Dart
-        uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
+        uses: dart-lang/setup-dart@main
 
       # For other repos, this should be `dart pub global activate firehose`
       - name: Pub get
