@@ -32,6 +32,7 @@ void main(List<String> arguments) {
     }
 
     var firehose = Firehose(Directory.current);
+
     if (verify) {
       firehose.verify();
     } else {

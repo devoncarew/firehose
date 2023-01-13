@@ -7,6 +7,8 @@ name: Publish
 on:
   push:
     branches: [main]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
@@ -15,9 +17,11 @@ jobs:
   auto-publish:
     # Update this to the host GitHub org.
     if: github.repository_owner == 'devoncarew'
-    # This is needed to push tags back to the repo.
+
+    # This is required for authentication using OIDC.
     permissions:
-      contents: write
+      id-token: write 
+
     runs-on: ubuntu-latest
     steps:
       # Checks out a copy of the repo. This fetches all commits in order to
@@ -39,3 +43,10 @@ jobs:
         run: dart pub run firehose --verify
         env:
           PR_LABELS: "${{ join(github.event.pull_request.labels.*.name) }}"
+
+      # TODO: pass in the tag we're attempting to publish
+
+      # For other repos, this should be `dart pub global run firehose`
+      - name: Publish changed packages
+        if: ${{ github.event_name == 'push' }}
+        run: dart pub run firehose --publish

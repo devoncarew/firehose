@@ -7,13 +7,8 @@ import 'src/git.dart';
 import 'src/github.dart';
 import 'src/utils.dart';
 
-// todo: support allowing the glob of files to ignore to be configurable in the
+// TODO: support allowing the glob of files to ignore to be configurable in the
 // action configuration file (test/**, ...)
-
-// todo: do we want to use the convention that pre-prelease pubspec versions are
-// not published, or, use the convention that changes where the first changelog
-// entry is 'unreleased' are not published? 'unreleased' is much clearer from
-// the POV of knowing what's published or not when looking at the repo.
 
 class Firehose {
   static const String _changelogExempt = 'changelog-exempt';
@@ -23,7 +18,7 @@ class Firehose {
   Firehose(this.directory);
 
   /// Verify the packages in the repository.
-  void verify() async {
+  Future verify() async {
     // for a PR:
     //   - determine changed files
     //   - determine affected packages
@@ -34,12 +29,11 @@ class Firehose {
   }
 
   /// Publish the changed packages in the repository.
-  void publish() async {
+  Future publish() async {
     // for the default branch:
     //   - determine changed files
     //   - determine affected packages
     //   - attempt to publish
-    //   - tag the commit
 
     await _publish(dryRun: false);
   }
@@ -160,6 +154,15 @@ class Firehose {
       }
 
       if (!dryRun) {
+        var result = await stream(
+          'dart',
+          args: ['pub', 'get'],
+          cwd: package.directory,
+        );
+        if (result != 0) {
+          io.exitCode = result;
+        }
+
         if (!packageChangesFiles.contains('pubspec.yaml')) {
           print('pubspec.yaml not changed; not attempting to publish.');
         } else if (package.pubspec.isPreRelease) {
