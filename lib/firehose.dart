@@ -106,7 +106,9 @@ class Firehose {
             print("No changelog update for this change (ignoring due to "
                 "'$_changelogExempt').");
           } else {
-            _failure('No changelog update for this change.');
+            _failure("No changelog update for this change. If you believe this "
+                "PR is exempt, add the '$_changelogExempt' label to skip the "
+                "changelog check.");
             issues++;
           }
         }
