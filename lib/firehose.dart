@@ -62,7 +62,7 @@ class Firehose {
 
       var changelogVersion = package.changelog.latestVersion;
       print('changelog:');
-      print(package.changelog.describeLatestChanges);
+      print(package.changelog.describeLatestChanges.trimRight());
 
       print('');
 

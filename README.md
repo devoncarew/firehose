@@ -8,7 +8,7 @@ This is a tool to automate publishing of pub packages from GitHub actions.
 
 ## Conventions and setup
 
-When run from a PR branch, this tool will validate the changed files, pubspecs,
+When run from a PR branch, this tool will validate the package pubspecs and
 and changelogs, and indicate whether the criteria for publishing has been met.
 Each PR should add a new entry to the changelog and the changelog version and
 pubspec version should agree.
@@ -16,16 +16,11 @@ pubspec version should agree.
 When run in reponse to a git tag event (a tag with a pattern like `v1.2.3` or
 `name_v1.2.3` for monorepos), this tool will publish the indicated package.
 
-## Skipping changelog validation for a PR
-
-To skip the package validation for a PR, add a `changelog-exempt` label to the
-PR. This should only be used for trivial changes that are not user facing.
-
 ## Pre-release versions
 
-Pre-release versions (aka, `'1.2.3-dev'`) are handled specially; this tool
-will validate the package changes, but will not auto-publish the package. This
-can be used to accumulate several changes and later publish them as a group.
+Pre-release versions (aka, `'1.2.3-dev'`) are handled specially; this tool will
+validate the package but will not auto-publish it. This can be used to
+accumulate several changes and later publish them as a group.
 
 ## Disabling auto-publishing
 
@@ -36,8 +31,7 @@ key to your pubspec (see also https://dart.dev/tools/pub/pubspec#publish_to).
 
 For a PR, this tool:
 
-- determines changed files
-- determines affected packages
+- determines repo packages
 - validates that there is a changelog entry
 - validates that the changelog version equals the pubspec version
 
@@ -45,7 +39,7 @@ For a PR, this tool:
 
 In reponse to a git tag event, this tool:
 
-- validate the tag is well-formed
+- validates the tag is well-formed
 - determines the indicated package
 - attempts to publish that package
 
