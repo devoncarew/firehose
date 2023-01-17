@@ -73,7 +73,7 @@ class Firehose {
 
       if (!package.pubspec.isPreRelease) {
         var code = await stream('dart',
-            args: ['pub', 'publish', '---dry-run'], cwd: package.directory);
+            args: ['pub', 'publish', '--dry-run'], cwd: package.directory);
         if (code != 0) io.exitCode = code;
       }
 
