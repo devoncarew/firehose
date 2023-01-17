@@ -1,3 +1,7 @@
+## 0.3.4
+
+- Run `dart pub publish --dry-run` for non pre-release packages.
+
 ## 0.3.3
 
 - Refactor changelog validation.

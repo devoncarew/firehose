@@ -23,6 +23,12 @@ void main() {
       expect(version, isNotNull);
     });
 
+    test('versionLine', () {
+      var versionLine = pubspec.versionLine;
+      expect(versionLine, isNotNull);
+      expect(versionLine, greaterThan(1));
+    });
+
     test('hasValidSemverVersion', () {
       var valid = pubspec.hasValidSemverVersion;
       expect(valid, isTrue);

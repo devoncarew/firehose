@@ -71,30 +71,24 @@ class Firehose {
             "($changelogVersion) don't agree.");
       }
 
-      if (package.pubspec.isPreRelease) {
-        var message =
-            'Note - version ($pubspecVersion) is pre-release; package will '
-            'not be auto-published.';
+      if (!package.pubspec.isPreRelease) {
+        var code = await stream('dart',
+            args: ['pub', 'publish', '--dry-run'], cwd: package.directory);
+        if (code != 0) io.exitCode = code;
+      }
 
-        print(message);
-        github.appendStepSummary('package:${package.name}', message);
+      if (package.pubspec.isPreRelease) {
+        print('Note - version ($pubspecVersion) is pre-release; package will '
+            'not be auto-published.');
       } else {
         var message =
             "After merging, tag with '$repoTag' to trigger a publish.";
-
         print('No issues found.\n$message');
+
         github.appendStepSummary(
           'package:${package.name}',
           '$message\n\n${package.changelog.describeLatestChanges}',
         );
-
-        if (package.pubspec.versionLine != null) {
-          github.emitFileNoticeMarker(
-            file: package.pubspec.localFilePath,
-            line: package.pubspec.versionLine!,
-            message: message,
-          );
-        }
       }
     }
   }
@@ -162,23 +156,13 @@ class Firehose {
           "($changelogVersion) don't agree.");
     }
 
-    var result = await stream(
-      'dart',
-      args: ['pub', 'get'],
-      cwd: package.directory,
-    );
-    if (result != 0) {
-      io.exitCode = result;
-    }
+    var result =
+        await stream('dart', args: ['pub', 'get'], cwd: package.directory);
+    if (result != 0) io.exitCode = result;
 
-    var code = await stream(
-      'dart',
-      args: ['pub', 'publish', '--force'],
-      cwd: package.directory,
-    );
-    if (code != 0) {
-      io.exitCode = code;
-    }
+    var code = await stream('dart',
+        args: ['pub', 'publish', '--force'], cwd: package.directory);
+    if (code != 0) io.exitCode = code;
   }
 
   Never _fail(String message) {
