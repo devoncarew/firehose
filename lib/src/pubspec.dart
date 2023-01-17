@@ -31,9 +31,6 @@ class Pubspec {
   /// (`'1.2.3-foo'`).
   bool get isPreRelease => semverVersion?.isPreRelease ?? false;
 
-  /// Return the `'auto_publish'`, if any.
-  Object? get autoPublishValue => _yaml['auto_publish'];
-
   /// Return the `'publish_to'`, if any.
   Object? get publishToValue => _yaml['publish_to'];
 

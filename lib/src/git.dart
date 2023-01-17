@@ -1,19 +1,5 @@
 import 'dart:io';
 
-import 'package:firehose/src/utils.dart';
-
-// from a branch:
-//   git.baseRef: main
-//   git.headRef: update_branch_logic
-//   git.ref: refs/pull/3/merge
-//   git.refName: 3/merge
-
-// from the default branch (after merging a PR):
-//   git.baseRef:
-//   git.headRef:
-//   git.ref: refs/heads/main
-//   git.refName: main
-
 class Git {
   /// Whether we're running withing the context of a GitHub action.
   bool get inGithubContext {
@@ -24,15 +10,6 @@ class Git {
   /// Whether we're being invoked in the context of a GitHub PR.
   bool get onGithubPR {
     return (baseRef?.isNotEmpty ?? false) && (headRef?.isNotEmpty ?? false);
-  }
-
-  /// Returns the number of git commits in the current branch.
-  int get commitCount {
-    var result = exec('git', args: ['rev-list', '--count', 'HEAD']);
-    if (result.exitCode != 0) {
-      return 0;
-    }
-    return int.tryParse(result.stdout.trim()) ?? 0;
   }
 
   /// The name of the event that triggered the workflow. For example,
@@ -81,19 +58,5 @@ class Git {
   /// `ffac537e6cbbf934b08745a378932722df287a53`.
   String? get sha {
     return Platform.environment['GITHUB_SHA'];
-  }
-
-  /// Get the list of changed files for this PR or push to main.
-  List<String> getChangedFiles({bool excludeTopLevelDotFiles = true}) {
-    var result = exec(
-      'git',
-      args: ['diff', '--name-only', 'HEAD', 'HEAD~1'],
-    );
-    return result.stdout
-        .split('\n')
-        .where((str) => str.isNotEmpty)
-        .where((path) {
-      return excludeTopLevelDotFiles ? !path.startsWith('.') : true;
-    }).toList();
   }
 }

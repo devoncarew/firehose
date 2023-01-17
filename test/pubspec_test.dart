@@ -34,12 +34,6 @@ void main() {
       expect(version, greaterThan(Version.none));
     });
 
-    test('autoPublishValue', () {
-      var value = pubspec.autoPublishValue;
-      expect(value, isNotNull);
-      expect(value, equals(true));
-    });
-
     test('publishToValue', () {
       var value = pubspec.publishToValue;
       expect(value, isNull);

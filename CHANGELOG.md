@@ -1,3 +1,8 @@
+## 0.3.3
+
+- Refactor changelog validation.
+- No longer just validate packages with changed files.
+
 ## 0.3.2+1
 
 - Update the documentation in the readme.

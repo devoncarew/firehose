@@ -18,8 +18,6 @@ void main() {
       var result = packages.locatePackages();
 
       expect(result, isNotEmpty);
-      // test a property of our specific package
-      expect(result.first.publishingEnabled, true);
     });
   });
 }

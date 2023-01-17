@@ -8,15 +8,11 @@ import 'pubspec.dart';
 
 class Package {
   final Directory directory;
-  final bool publishingEnabled;
 
   late final Pubspec pubspec;
   late final Changelog changelog;
 
-  Package(
-    this.directory, {
-    this.publishingEnabled = true,
-  }) {
+  Package(this.directory) {
     pubspec = Pubspec(directory);
     changelog = Changelog(File(path.join(directory.path, 'CHANGELOG.md')));
   }
@@ -36,9 +32,7 @@ class Package {
 
   @override
   String toString() {
-    var notPublishable = publishingEnabled ? '' : ' [publishing disabled]';
-    return 'package:${pubspec.name}, ${pubspec.version}, '
-        '${path.relative(directory.path)}$notPublishable';
+    return 'package:${pubspec.name}, ${pubspec.version}, ${directory.path}';
   }
 }
 
@@ -61,10 +55,10 @@ class Repo {
   /// This could be one package - if this is a single package repository - or
   /// multiple packages, if this is a monorepo.
   ///
-  /// Packages will only be returned if their pubspec contains an 'auto_publish'
-  /// key with a value of `true`. If that 'auto_publish' key is set to `false`,
-  /// the package will still be returned, but its Package.publishingEnabled flag
-  /// will be false.
+  /// Packages will be returned if their pubspec doesn't contain a
+  /// `publish_to: none` key.
+  ///
+  /// Once we find a package, we don't look for packages in sub-directories.
   List<Package> locatePackages() {
     return _recurseAndGather(Directory.current, []);
   }
@@ -74,13 +68,9 @@ class Repo {
 
     if (pubspecFile.existsSync()) {
       var pubspec = yaml.loadYaml(pubspecFile.readAsStringSync()) as Map;
-      if (pubspec.containsKey('auto_publish')) {
-        var publishable = pubspec['auto_publish'] == true;
-        // check for 'publish_to: none'
-        if (pubspec['publish_to'] == 'none') {
-          publishable = false;
-        }
-        packages.add(Package(directory, publishingEnabled: publishable));
+      var publishTo = pubspec['publish_to'] as String?;
+      if (publishTo != 'none') {
+        packages.add(Package(directory));
       }
     } else {
       for (var child in directory.listSync().whereType<Directory>()) {

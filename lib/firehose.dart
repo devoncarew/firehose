@@ -8,12 +8,7 @@ import 'src/git.dart';
 import 'src/github.dart';
 import 'src/utils.dart';
 
-// TODO: support allowing the glob of files to ignore to be configurable in the
-// action configuration file (test/**, ...)
-
 class Firehose {
-  static const String _changelogExempt = 'changelog-exempt';
-
   final Directory directory;
 
   Firehose(this.directory);
@@ -21,9 +16,7 @@ class Firehose {
   /// Verify the packages in the repository.
   Future verify() async {
     // for a PR:
-    //   - determine changed files
-    //   - determine affected packages
-    //   - validate that there's a changelog entry
+    //   - determine packages
     //   - validate that the changelog version == the pubspec version
 
     try {
@@ -35,7 +28,7 @@ class Firehose {
     }
   }
 
-  /// Publish the changed packages in the repository.
+  /// Publish the indicated package in the repository.
   Future publish() async {
     // for tagged commits:
     //   - validate the tag
@@ -53,28 +46,11 @@ class Firehose {
   }
 
   Future<void> _verify() async {
-    var git = Git();
     var github = Github();
-
-    var changedFiles = git.getChangedFiles();
-    print('Repository changed files:');
-    for (var file in changedFiles) {
-      print('- $file');
-    }
-
     var repo = Repo();
     var packages = repo.locatePackages();
-    print('');
-    print('Repository publishable packages:');
+
     for (var package in packages) {
-      print('  $package');
-    }
-
-    var changedPackages = _calculateChangedPackages(packages, changedFiles);
-    print('');
-    print('Found ${changedPackages.length} changed package(s).');
-
-    for (var package in changedPackages) {
       var repoTag = repo.calculateRepoTag(package);
 
       print('');
@@ -82,42 +58,14 @@ class Firehose {
 
       print('pubspec:');
       var pubspecVersion = package.pubspec.version;
-      print('  version: ${_bold(pubspecVersion)}');
-      if (package.pubspec.autoPublishValue != null) {
-        print('  auto_publish: ${package.pubspec.autoPublishValue}');
-      }
-      if (package.pubspec.publishToValue != null) {
-        print('  publish_to: ${package.pubspec.publishToValue}');
-      }
+      print('  pubspec version: ${_bold(pubspecVersion)}');
 
-      var packageChangesFiles = package.matchingFiles(changedFiles);
-
-      var changelogUpdated = packageChangesFiles.contains('CHANGELOG.md');
       var changelogVersion = package.changelog.latestVersion;
-      if (changelogUpdated) {
-        print('changelog:');
-        print(package.changelog.describeLatestChanges);
-      }
+      print('changelog:');
+      print(package.changelog.describeLatestChanges.trimRight());
 
-      print('changed files:');
-      for (var file in packageChangesFiles) {
-        print('  $file');
-      }
+      print('');
 
-      var labels = (env['PR_LABELS'] ?? '').split(',');
-      var changelogExempt = labels.contains(_changelogExempt);
-
-      // checks
-      if (!changelogUpdated) {
-        if (changelogExempt) {
-          print("No changelog update for this change (ignoring due to "
-              "'$_changelogExempt').");
-        } else {
-          _fail("No changelog update for this change. If you believe this "
-              "PR is exempt, add the '$_changelogExempt' label to skip the "
-              "changelog check.");
-        }
-      }
       if (pubspecVersion != changelogVersion) {
         _fail("pubspec version ($pubspecVersion) and changelog "
             "($changelogVersion) don't agree.");
@@ -196,9 +144,6 @@ class Firehose {
     print('pubspec:');
     var pubspecVersion = package.pubspec.version;
     print('  version: ${_bold(pubspecVersion)}');
-    if (package.pubspec.autoPublishValue != null) {
-      print('  auto_publish: ${package.pubspec.autoPublishValue}');
-    }
     if (package.pubspec.publishToValue != null) {
       print('  publish_to: ${package.pubspec.publishToValue}');
     }
@@ -234,21 +179,6 @@ class Firehose {
     if (code != 0) {
       io.exitCode = code;
     }
-  }
-
-  List<Package> _calculateChangedPackages(
-    List<Package> packages,
-    List<String> changedFiles,
-  ) {
-    var results = <Package>{};
-    for (var package in packages) {
-      for (var file in changedFiles) {
-        if (package.containsFile(file)) {
-          results.add(package);
-        }
-      }
-    }
-    return results.toList();
   }
 
   Never _fail(String message) {
