@@ -25,10 +25,10 @@ jobs:
       - name: Pub get
         run: dart pub get
 
-      - name: Validate changed packages
+      - name: Validate packages
         if: ${{ github.event_name == 'pull_request' }}
         run: dart pub run firehose --verify
 
-      - name: Publish packages
+      - name: Publish tagged package
         if: ${{ github.event_name == 'push' }}
         run: dart pub run firehose --publish

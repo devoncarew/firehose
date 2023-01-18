@@ -1,3 +1,8 @@
+## 0.3.5
+
+- Improve pub dry run validation.
+- Check if the package version is already published.
+
 ## 0.3.4
 
 - Run `dart pub publish --dry-run` for non pre-release packages.

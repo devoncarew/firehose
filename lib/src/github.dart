@@ -1,8 +1,6 @@
 import 'dart:io';
 
 class Github {
-  // todo:
-
   /// Write the given [markdownSummary] content to the GitHub
   /// `GITHUB_STEP_SUMMARY` file. This will cause the markdown output to be
   /// appended to the GitHub job summary for the current PR.
