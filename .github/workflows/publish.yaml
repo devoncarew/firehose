@@ -18,7 +18,7 @@ on:
   workflow_call:
 
 jobs:
-  auto-publish:
+  publish:
     # This is required for authentication using OIDC.
     permissions:
       id-token: write 
