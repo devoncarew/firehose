@@ -11,7 +11,7 @@ class Github {
       return;
     }
 
-    var output = '## $title\n\n$markdownSummary\n';
+    var output = '### $title\n\n$markdownSummary\n';
 
     var file = File(summaryPath);
     file.writeAsStringSync(output, mode: FileMode.append);

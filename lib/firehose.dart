@@ -85,13 +85,10 @@ class Firehose {
 
         if (code == 0) {
           var message =
-              "After merging, tag with '$repoTag' to trigger a publish.";
+              'After merging, tag with $repoTag to trigger a publish.';
           print('No issues found.\n$message');
 
-          github.appendStepSummary(
-            'package:${package.name}',
-            '$message\n\n${package.changelog.describeLatestChanges}',
-          );
+          github.appendStepSummary('package:${package.name}', message);
         }
       }
     }
