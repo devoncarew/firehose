@@ -6,6 +6,7 @@ import 'package:firehose/src/repo.dart';
 
 import 'src/git.dart';
 import 'src/github.dart';
+import 'src/pub.dart';
 import 'src/utils.dart';
 
 class Firehose {
@@ -48,6 +49,7 @@ class Firehose {
   Future<void> _verify() async {
     var github = Github();
     var repo = Repo();
+    var pub = Pub();
     var packages = repo.locatePackages();
 
     for (var package in packages) {
@@ -71,24 +73,23 @@ class Firehose {
             "($changelogVersion) don't agree.");
       }
 
-      if (!package.pubspec.isPreRelease) {
-        var code = await stream('dart',
-            args: ['pub', 'publish', '--dry-run'], cwd: package.directory);
-        if (code != 0) io.exitCode = code;
-      }
-
-      if (package.pubspec.isPreRelease) {
+      if (await pub.hasPublishedVersion(package.name, pubspecVersion!)) {
+        print('$pubspecVersion already published at pub.dev.');
+      } else if (package.pubspec.isPreRelease) {
         print('Note - version ($pubspecVersion) is pre-release; package will '
             'not be auto-published.');
       } else {
-        var message =
-            "After merging, tag with '$repoTag' to trigger a publish.";
-        print('No issues found.\n$message');
+        var code = await stream('dart',
+            args: ['pub', 'publish', '--dry-run'], cwd: package.directory);
+        if (code != 0) io.exitCode = code;
 
-        github.appendStepSummary(
-          'package:${package.name}',
-          '$message\n\n${package.changelog.describeLatestChanges}',
-        );
+        if (code == 0) {
+          var message =
+              'After merging, tag with $repoTag to trigger a publish.';
+          print('No issues found.\n$message');
+
+          github.appendStepSummary('package:${package.name}', message);
+        }
       }
     }
   }
