@@ -24,9 +24,28 @@ void main() {
     });
 
     test('mono repo', () {
-      var tag = Tag('foobar_v1.2.3');
+      var tag = Tag('foobar-v1.2.3');
       expect(tag.package, 'foobar');
       expect(tag.version, '1.2.3');
+    });
+
+    test('mono repo 2', () {
+      var tag = Tag('foo_bar-v1.2.3');
+      expect(tag.package, 'foo_bar');
+      expect(tag.version, '1.2.3');
+    });
+
+    test('mono repo bad', () {
+      var tag = Tag('foobar_v1.2.3');
+      expect(tag.valid, false);
+    });
+
+    test('mono repo bad 2', () {
+      var tag = Tag('foobar_1.2.3');
+      expect(tag.valid, false);
+
+      tag = Tag('foobar-1.2.3');
+      expect(tag.valid, false);
     });
   });
 }

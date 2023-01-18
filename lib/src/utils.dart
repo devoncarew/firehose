@@ -33,9 +33,9 @@ Future<int> stream(
 
 class Tag {
   static final RegExp packageVersionTag =
-      RegExp(r'(\S+)_v(\d+\.\d+\.\d+(\+.*)?)');
+      RegExp(r'^(\S+)-v(\d+\.\d+\.\d+(\+.*)?)');
 
-  static final RegExp packageTag = RegExp(r'v(\d+\.\d+\.\d+(\+.*)?)');
+  static final RegExp versionTag = RegExp(r'^v(\d+\.\d+\.\d+(\+.*)?)');
 
   final String tag;
 
@@ -53,7 +53,7 @@ class Tag {
     if (match != null) {
       return match.group(2);
     }
-    match = packageTag.firstMatch(tag);
+    match = versionTag.firstMatch(tag);
     return match?.group(1);
   }
 }

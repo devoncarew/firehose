@@ -1,3 +1,8 @@
+## 0.3.6+1
+
+- Fix an issue with mono-repo tag formats (we should be expecting
+  `package_name-v1.2.3`).
+
 ## 0.3.6
 
 - Introduce a reusable workflow (`.github/workflows/publish.yaml`).

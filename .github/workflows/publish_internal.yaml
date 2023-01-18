@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    if: github.repository_owner == 'devoncarew'
+    if: ${{ github.repository_owner == 'devoncarew' }}
 
     # This is required for authentication using OIDC.
     permissions:
