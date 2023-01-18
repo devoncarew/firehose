@@ -8,10 +8,10 @@ This is a tool to automate publishing of pub packages from GitHub actions.
 
 ## Conventions and setup
 
-When run from a PR branch, this tool will validate the package pubspecs and
-and changelogs, and indicate whether the criteria for publishing has been met.
-Each PR should add a new entry to the changelog and the changelog version and
-pubspec version should agree.
+When run from a PR, this tool will validate the package pubspecs and and
+changelogs and indicate whether the criteria for publishing has been met.
+Generally, each PR should add a new entry to the changelog, rev the pubspec
+version, and the changelog version and pubspec version should agree.
 
 When run in reponse to a git tag event (a tag with a pattern like `v1.2.3` or
 `name_v1.2.3` for monorepos), this tool will publish the indicated package.
@@ -24,16 +24,16 @@ accumulate several changes and later publish them as a group.
 
 ## Disabling auto-publishing
 
-In order to disable package validation and auto-publishing, `publish_to: none`
-key to your pubspec (see also https://dart.dev/tools/pub/pubspec#publish_to).
+In order to disable package validation and auto-publishing, add the
+`publish_to: none` key to your pubspec.
 
 ## PR branch actions
 
-For a PR, this tool:
+For PRs, this tool:
 
 - determines repo packages
-- validates that there is a changelog entry
 - validates that the changelog version equals the pubspec version
+- performs a `dart pub publish --dry-run`
 
 ## Git tag actions
 
@@ -41,7 +41,7 @@ In reponse to a git tag event, this tool:
 
 - validates the tag is well-formed
 - determines the indicated package
-- attempts to publish that package
+- attempts to publish that package (`dart pub publish --force`)
 
 ## Mono-repos
 
@@ -55,6 +55,45 @@ the tage pattern be prefixed with the package name, e.g. `foo-v1.2.3`.
 
 ## Integrating this tool into a repo
 
-- copy the .github/workflows/publish.yaml file to your repo
-- update that file to invoke this tool via pub global activate (i.e.,
-  `dart pub global activate firehose`; `dart pub global run firehose`)
+- copy the yaml below into a `.github/workflows/publish.yaml` file in your repo
+- update the 'my_org' placeholder text to the name of your GitHub org
+  (`my_org/my_repo`)
+- from the pub.dev admin page of your package, enable publishing from GitHub
+  Actions
+
+```yaml
+# A CI configuration to auto-publish pub packages.
+
+name: Publish
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+*' ]
+
+jobs:
+  auto-publish:
+    # Update this to the host GitHub org.
+    if: github.repository_owner == 'my_org'
+
+    # This is required for authentication using OIDC.
+    permissions:
+      id-token: write 
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install firehose
+        run: dart pub global activate firehose
+
+      - name: Validate packages
+        if: ${{ github.event_name == 'pull_request' }}
+        run: dart pub global run firehose --verify
+
+      - name: Publish packages
+        if: ${{ github.event_name == 'push' }}
+        run: dart pub global run firehose --publish
+```
