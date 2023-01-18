@@ -1,3 +1,7 @@
+## 0.3.6
+
+- Introduce a reusable workflow (`.github/workflows/publish.yaml`).
+
 ## 0.3.5
 
 - Improve pub dry run validation.

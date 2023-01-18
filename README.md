@@ -56,8 +56,7 @@ the tage pattern be prefixed with the package name, e.g. `foo-v1.2.3`.
 ## Integrating this tool into a repo
 
 - copy the yaml below into a `.github/workflows/publish.yaml` file in your repo
-- update the 'my_org' placeholder text to the name of your GitHub org
-  (`my_org/my_repo`)
+- update the target branch below if necessary (currently, `main`)
 - from the pub.dev admin page of your package, enable publishing from GitHub
   Actions
 
@@ -73,27 +72,6 @@ on:
     tags: [ 'v[0-9]+.[0-9]+.[0-9]+*' ]
 
 jobs:
-  auto-publish:
-    # Update this to the host GitHub org.
-    if: github.repository_owner == 'my_org'
-
-    # This is required for authentication using OIDC.
-    permissions:
-      id-token: write 
-
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dart-lang/setup-dart@v1
-
-      - name: Install firehose
-        run: dart pub global activate firehose
-
-      - name: Validate packages
-        if: ${{ github.event_name == 'pull_request' }}
-        run: dart pub global run firehose --verify
-
-      - name: Publish packages
-        if: ${{ github.event_name == 'push' }}
-        run: dart pub global run firehose --publish
+  publish:
+    uses: devoncarew/firehose/.github/workflows/publish.yml@main
 ```
