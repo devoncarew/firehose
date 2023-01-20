@@ -1,3 +1,5 @@
+## 0.3.7-dev
+
 ## 0.3.6+1
 
 - Fix an issue with mono-repo tag formats (we should be expecting

@@ -89,9 +89,18 @@ class Firehose {
           print('No issues found.\n$message');
 
           github.appendStepSummary('package:${package.name}', message);
+
+          var result = await github.createComment(
+            github.repoSlug!,
+            github.issueNumber!,
+            message,
+          );
+          print(result);
         }
       }
     }
+
+    github.close();
   }
 
   Future<void> _publish() async {
