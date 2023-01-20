@@ -16,7 +16,7 @@ class Github {
 
   static Map<String, String> get _env => Platform.environment;
 
-  String? get repoSlug => _env['GITHUB_ACTION_REPOSITORY'];
+  String? get repoSlug => _env['GITHUB_REPOSITORY'];
 
   String? get issueNumber => _env['ISSUE_NUMBER'];
 
