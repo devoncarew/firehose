@@ -14,7 +14,7 @@ class Github {
     _httpClient?.close();
   }
 
-  static Map<String, String> get _env => _env;
+  static Map<String, String> get _env => Platform.environment;
 
   String? get repoSlug => _env['GITHUB_ACTION_REPOSITORY'];
 
