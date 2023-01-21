@@ -64,10 +64,8 @@ class Firehose {
     // );
 
     var existingCommentId = await github.findCommentId(
-      github.repoSlug!,
-      github.issueNumber!,
-      user: 'github-actions',
-    );
+        github.repoSlug!, github.issueNumber!,
+        user: 'github-actions[bot]', searchTerm: '**publish bot**:');
 
     print('existingCommentId=$existingCommentId');
 

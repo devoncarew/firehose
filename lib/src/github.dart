@@ -131,10 +131,7 @@ class Github {
       var userLogin = item['user']['login'] as String;
       var body = item['body'] as String;
 
-      print('comment: $id, user: $userLogin');
-
       if (userLogin != user) continue;
-
       if (searchTerm != null && !body.contains(searchTerm)) continue;
 
       return id;
