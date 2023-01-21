@@ -52,6 +52,15 @@ class Firehose {
     var pub = Pub();
     var packages = repo.locatePackages();
 
+    var checkRunId = await github.createCheckRun(
+      github.repoSlug!,
+      name: 'publishing',
+      sha: github.sha!,
+      status: 'in_progress',
+      outputTitle: 'Publishing checks',
+      outputSummary: 'Checks in progress.',
+    );
+
     for (var package in packages) {
       var repoTag = repo.calculateRepoTag(package);
 
@@ -90,12 +99,26 @@ class Firehose {
 
           github.appendStepSummary('package:${package.name}', message);
 
-          var result = await github.createComment(
+          // "**publish bot**: package:firehose \@ 0.3.7 is ready to publish.
+          // After merging, tag with `v0.3.7` to trigger a publish.""
+
+          // var result = await github.createComment(
+          //   github.repoSlug!,
+          //   github.issueNumber!,
+          //   message,
+          // );
+          // print(result);
+
+          // todo: create the checks at the end...
+          await github.updateCheckRun(
             github.repoSlug!,
-            github.issueNumber!,
-            message,
+            checkRunId,
+            conclusion: 'success',
+            outputTitle: 'Publishing checks',
+            outputSummary: 'package:${package.name} \\@ ${package.version} is '
+                'ready to publish. After merging, tag with `$repoTag` to '
+                'trigger a publish.',
           );
-          print(result);
         }
       }
     }

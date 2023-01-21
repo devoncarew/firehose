@@ -20,6 +20,8 @@ class Github {
 
   String? get issueNumber => _env['ISSUE_NUMBER'];
 
+  String? get sha => _env['GITHUB_SHA'];
+
   /// Write the given [markdownSummary] content to the GitHub
   /// `GITHUB_STEP_SUMMARY` file. This will cause the markdown output to be
   /// appended to the GitHub job summary for the current PR.
@@ -69,6 +71,23 @@ class Github {
             },
             body: body)
         .then((response) {
+      return response.statusCode != 201
+          ? throw response.reasonPhrase!
+          : response.body;
+    });
+  }
+
+  Future<String> callRestApiPatch(Uri uri, String body) async {
+    var token = _githubAuthToken!;
+
+    return httpClient
+        .patch(uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/vnd.github+json',
+            },
+            body: body)
+        .then((response) {
       return response.statusCode != 200
           ? throw response.reasonPhrase!
           : response.body;
@@ -87,5 +106,64 @@ class Github {
     );
     var json = jsonDecode(result) as Map;
     return json['url'];
+  }
+
+  // create a check run
+  // POST /repos/{owner}/{repo}/check-runs
+  // [status] is one of queued, in_progress, completed
+  Future<int> createCheckRun(
+    String repoSlug, {
+    required String name,
+    required String sha,
+    required String status,
+    required String outputTitle,
+    required String outputSummary,
+  }) async {
+    String org = repoSlug.split('/')[0];
+    String repo = repoSlug.split('/')[1];
+
+    var result = await callRestApiPost(
+      Uri.parse('https://api.github.com/repos/$org/$repo/check-runs'),
+      jsonEncode({
+        'name': name,
+        'head_sha': sha,
+        'status': status,
+        'output': {
+          'title': outputTitle,
+          'summary': outputSummary,
+        },
+      }),
+    );
+    var json = jsonDecode(result) as Map;
+    return json['id'] as int;
+  }
+
+  // update a check run
+  // PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}
+  // [conclusion] can be one of action_required, cancelled, failure, neutral,
+  // success, skipped, stale, timed_out
+  Future updateCheckRun(
+    String repoSlug,
+    int checkRunId, {
+    required String conclusion,
+    required String outputTitle,
+    required String outputSummary,
+  }) async {
+    String org = repoSlug.split('/')[0];
+    String repo = repoSlug.split('/')[1];
+
+    var result = await callRestApiPatch(
+      Uri.parse(
+          'https://api.github.com/repos/$org/$repo/check-runs/$checkRunId'),
+      jsonEncode({
+        'conclusion': conclusion,
+        'output': {
+          'title': outputTitle,
+          'summary': outputSummary,
+        },
+      }),
+    );
+    // ignore: unused_local_variable
+    var json = jsonDecode(result) as Map;
   }
 }

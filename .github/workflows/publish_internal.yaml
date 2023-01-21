@@ -17,6 +17,8 @@ jobs:
       id-token: write
       # This lets us create comments on the PR.
       pull-requests: write
+      # This lets us create and update check runs.
+      checks: write
 
     runs-on: ubuntu-latest
     steps:

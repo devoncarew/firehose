@@ -19,6 +19,8 @@ class Package {
 
   String get name => pubspec.name;
 
+  String get version => pubspec.version!;
+
   bool containsFile(String file) {
     return path.isWithin(directory.path, file);
   }
