@@ -22,6 +22,8 @@ class Github {
 
   String? get sha => _env['GITHUB_SHA'];
 
+  String? get actor => _env['GITHUB_ACTOR'];
+
   /// Write the given [markdownSummary] content to the GitHub
   /// `GITHUB_STEP_SUMMARY` file. This will cause the markdown output to be
   /// appended to the GitHub job summary for the current PR.
@@ -49,16 +51,18 @@ class Github {
     print('::notice file=$file,line=$line::$message');
   }
 
-  // Future<String?> callRestApi(Uri uri) async {
-  //   var token = _githubAuthToken!;
+  Future<String> callRestApi(Uri uri) async {
+    var token = _githubAuthToken!;
 
-  //   return httpClient.get(uri, headers: {
-  //     'Authorization': 'Bearer $token',
-  //     'Accept': 'application/vnd.github+json',
-  //   }).then((response) {
-  //     return response.statusCode == 404 ? null : response.body;
-  //   });
-  // }
+    return httpClient.get(uri, headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/vnd.github+json',
+    }).then((response) {
+      return response.statusCode != 200
+          ? throw response.reasonPhrase!
+          : response.body;
+    });
+  }
 
   Future<String> callRestApiPost(Uri uri, String body) async {
     var token = _githubAuthToken!;
@@ -102,6 +106,50 @@ class Github {
     var result = await callRestApiPost(
       Uri.parse(
           'https://api.github.com/repos/$org/$repo/issues/$issueNumber/comments'),
+      jsonEncode({'body': commentText}),
+    );
+    var json = jsonDecode(result) as Map;
+    return json['url'];
+  }
+
+  Future<String?> findCommentId(
+    String repoSlug,
+    String issueNumber, {
+    required String user,
+    String? searchTerm,
+  }) async {
+    String org = repoSlug.split('/')[0];
+    String repo = repoSlug.split('/')[1];
+
+    var result = await callRestApi(
+      Uri.parse('https://api.github.com/repos/$org/$repo/issues/$issueNumber/'
+          'comments?per_page=100'),
+    );
+
+    var items = jsonDecode(result) as List;
+    for (var item in items) {
+      item as Map;
+      var body = item['body'] as String;
+      var userLogin = item['user']['login'] as String;
+
+      if (userLogin != user) continue;
+
+      if (searchTerm != null && !body.contains(searchTerm)) continue;
+
+      return item['id'];
+    }
+
+    return null;
+  }
+
+  Future<String> updateComment(
+      String repoSlug, String commentId, String commentText) async {
+    String org = repoSlug.split('/')[0];
+    String repo = repoSlug.split('/')[1];
+
+    var result = await callRestApiPatch(
+      Uri.parse(
+          'https://api.github.com/repos/$org/$repo/issues/comments/$commentId'),
       jsonEncode({'body': commentText}),
     );
     var json = jsonDecode(result) as Map;

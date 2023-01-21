@@ -9,6 +9,8 @@ import 'src/github.dart';
 import 'src/pub.dart';
 import 'src/utils.dart';
 
+// todo: create a results object
+
 class Firehose {
   final Directory directory;
 
@@ -52,14 +54,24 @@ class Firehose {
     var pub = Pub();
     var packages = repo.locatePackages();
 
-    var checkRunId = await github.createCheckRun(
+    // var checkRunId = await github.createCheckRun(
+    //   github.repoSlug!,
+    //   name: 'publishing',
+    //   sha: github.sha!,
+    //   status: 'in_progress',
+    //   outputTitle: 'Publishing checks',
+    //   outputSummary: 'Checks in progress.',
+    // );
+
+    print('actor=${github.actor}');
+
+    var existingCommentId = await github.findCommentId(
       github.repoSlug!,
-      name: 'publishing',
-      sha: github.sha!,
-      status: 'in_progress',
-      outputTitle: 'Publishing checks',
-      outputSummary: 'Checks in progress.',
+      github.issueNumber!,
+      user: 'github-actions',
     );
+
+    print('existingCommentId=$existingCommentId');
 
     for (var package in packages) {
       var repoTag = repo.calculateRepoTag(package);
@@ -101,24 +113,37 @@ class Firehose {
 
           // "**publish bot**: package:firehose \@ 0.3.7 is ready to publish.
           // After merging, tag with `v0.3.7` to trigger a publish.""
+          var githubMessage =
+              '**publish bot**: package:${package.name} \\@ ${package.version} '
+              'is ready to publish. After merging, tag with `$repoTag` to '
+              'trigger a publish.';
 
-          // var result = await github.createComment(
+          if (existingCommentId == null) {
+            var result = await github.createComment(
+              github.repoSlug!,
+              github.issueNumber!,
+              githubMessage,
+            );
+            print(result);
+          } else {
+            var result = await github.updateComment(
+              github.repoSlug!,
+              existingCommentId,
+              githubMessage,
+            );
+            print(result);
+          }
+
+          // // todo: create the checks at the end...
+          // await github.updateCheckRun(
           //   github.repoSlug!,
-          //   github.issueNumber!,
-          //   message,
+          //   checkRunId,
+          //   conclusion: 'success',
+          //   outputTitle: 'Publishing checks',
+          //   outputSummary: 'package:${package.name} \\@ ${package.version} is '
+          //       'ready to publish. After merging, tag with `$repoTag` to '
+          //       'trigger a publish.',
           // );
-          // print(result);
-
-          // todo: create the checks at the end...
-          await github.updateCheckRun(
-            github.repoSlug!,
-            checkRunId,
-            conclusion: 'success',
-            outputTitle: 'Publishing checks',
-            outputSummary: 'package:${package.name} \\@ ${package.version} is '
-                'ready to publish. After merging, tag with `$repoTag` to '
-                'trigger a publish.',
-          );
         }
       }
     }
