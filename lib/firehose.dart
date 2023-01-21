@@ -63,8 +63,6 @@ class Firehose {
     //   outputSummary: 'Checks in progress.',
     // );
 
-    print('actor=${github.actor}');
-
     var existingCommentId = await github.findCommentId(
       github.repoSlug!,
       github.issueNumber!,

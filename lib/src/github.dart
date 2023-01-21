@@ -22,8 +22,6 @@ class Github {
 
   String? get sha => _env['GITHUB_SHA'];
 
-  String? get actor => _env['GITHUB_ACTOR'];
-
   /// Write the given [markdownSummary] content to the GitHub
   /// `GITHUB_STEP_SUMMARY` file. This will cause the markdown output to be
   /// appended to the GitHub job summary for the current PR.
@@ -112,7 +110,7 @@ class Github {
     return json['url'];
   }
 
-  Future<String?> findCommentId(
+  Future<int?> findCommentId(
     String repoSlug,
     String issueNumber, {
     required String user,
@@ -129,21 +127,24 @@ class Github {
     var items = jsonDecode(result) as List;
     for (var item in items) {
       item as Map;
-      var body = item['body'] as String;
+      var id = item['id'] as int;
       var userLogin = item['user']['login'] as String;
+      var body = item['body'] as String;
+
+      print('comment: $id, user: $userLogin');
 
       if (userLogin != user) continue;
 
       if (searchTerm != null && !body.contains(searchTerm)) continue;
 
-      return item['id'];
+      return id;
     }
 
     return null;
   }
 
   Future<String> updateComment(
-      String repoSlug, String commentId, String commentText) async {
+      String repoSlug, int commentId, String commentText) async {
     String org = repoSlug.split('/')[0];
     String repo = repoSlug.split('/')[1];
 
