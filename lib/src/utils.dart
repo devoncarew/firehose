@@ -56,4 +56,7 @@ class Tag {
     match = versionTag.firstMatch(tag);
     return match?.group(1);
   }
+
+  @override
+  String toString() => tag;
 }

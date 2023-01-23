@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:firehose/firehose.dart';
-import 'package:firehose/src/git.dart';
+import 'package:firehose/src/github.dart';
 
 void main(List<String> arguments) async {
   var argParser = _createArgs();
@@ -23,8 +23,8 @@ void main(List<String> arguments) async {
       exit(1);
     }
 
-    var git = Git();
-    if (publish && !git.inGithubContext) {
+    var github = Github();
+    if (publish && !github.inGithubContext) {
       _usage(argParser,
           error: 'Error: --publish can only be executed from within a GitHub '
               'action.');

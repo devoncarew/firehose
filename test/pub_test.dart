@@ -9,6 +9,10 @@ void main() {
       pub = Pub();
     });
 
+    tearDown(() {
+      pub.close();
+    });
+
     test('version exists', () async {
       var result = await pub.hasPublishedVersion('path', '1.8.0');
       expect(result, true);
