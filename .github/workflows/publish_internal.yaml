@@ -12,13 +12,11 @@ jobs:
   publish:
     if: ${{ github.repository_owner == 'devoncarew' }}
 
+    # These permissions are required for authentication using OIDC and to enable
+    # us to create comments on PRs.
     permissions:
-      # This is required for authentication using OIDC.
       id-token: write
-      # This lets us create comments on the PR.
       pull-requests: write
-      # This lets us create and update check runs.
-      checks: write
 
     runs-on: ubuntu-latest
     steps:

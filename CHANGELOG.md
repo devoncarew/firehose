@@ -1,4 +1,4 @@
-## 0.3.7-dev
+## 0.3.7
 
 - Provide feedback about publishing status as PR comments.
 
