@@ -1,3 +1,7 @@
+## 0.3.7+1
+
+- Fix an issue in the publish.yaml workflow file.
+
 ## 0.3.7
 
 - Provide feedback about publishing status as PR comments.

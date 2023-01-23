@@ -35,6 +35,9 @@ jobs:
 
       - name: Validate packages
         if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.number }}
         run: dart pub global run firehose --verify
 
       - name: Publish packages
