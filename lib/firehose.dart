@@ -218,8 +218,6 @@ class Firehose {
     }
     return result == 0;
   }
-
-  Map<String, String> get env => Platform.environment;
 }
 
 class VerificationResults {

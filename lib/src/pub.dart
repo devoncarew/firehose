@@ -19,7 +19,6 @@ class Pub {
     return versions.contains(version);
   }
 
-  // todo: call this
   void close() {
     _httpClient?.close();
   }

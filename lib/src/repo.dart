@@ -6,36 +6,6 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import 'pubspec.dart';
 
-class Package {
-  final Directory directory;
-
-  late final Pubspec pubspec;
-  late final Changelog changelog;
-
-  Package(this.directory) {
-    pubspec = Pubspec(directory);
-    changelog = Changelog(File(path.join(directory.path, 'CHANGELOG.md')));
-  }
-
-  String get name => pubspec.name;
-
-  bool containsFile(String file) {
-    return path.isWithin(directory.path, file);
-  }
-
-  List<String> matchingFiles(List<String> changedFiles) {
-    var fullPath = directory.absolute.path;
-    return changedFiles.where(containsFile).map((file) {
-      return File(file).absolute.path.substring(fullPath.length + 1);
-    }).toList();
-  }
-
-  @override
-  String toString() {
-    return 'package:${pubspec.name} ${pubspec.version} (dir=${directory.path})';
-  }
-}
-
 class Repo {
   /// Returns true if this repository hosts only a single package, and that
   /// package lives at the top level of the repo.
@@ -90,5 +60,35 @@ class Repo {
     } else {
       return '${package.name}-v${package.pubspec.version}';
     }
+  }
+}
+
+class Package {
+  final Directory directory;
+
+  late final Pubspec pubspec;
+  late final Changelog changelog;
+
+  Package(this.directory) {
+    pubspec = Pubspec(directory);
+    changelog = Changelog(File(path.join(directory.path, 'CHANGELOG.md')));
+  }
+
+  String get name => pubspec.name;
+
+  bool containsFile(String file) {
+    return path.isWithin(directory.path, file);
+  }
+
+  List<String> matchingFiles(List<String> changedFiles) {
+    var fullPath = directory.absolute.path;
+    return changedFiles.where(containsFile).map((file) {
+      return File(file).absolute.path.substring(fullPath.length + 1);
+    }).toList();
+  }
+
+  @override
+  String toString() {
+    return 'package:${pubspec.name} ${pubspec.version} (dir=${directory.path})';
   }
 }
