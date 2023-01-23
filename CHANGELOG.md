@@ -1,6 +1,6 @@
 ## 0.3.7+1
 
-- Fix an issue in the publish.yaml workflow file.
+- Fix an issue in the `.github/workflows/publish.yaml` workflow file.
 
 ## 0.3.7
 
