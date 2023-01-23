@@ -79,6 +79,19 @@ class Github {
     });
   }
 
+  Future<void> callRestApiDelete(Uri uri) async {
+    var token = _githubAuthToken!;
+
+    return httpClient.delete(uri, headers: {
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/vnd.github+json',
+    }).then((response) {
+      if (response.statusCode != 204) {
+        throw RpcException(response.reasonPhrase!);
+      }
+    });
+  }
+
   /// Create a new comment on the given PR.
   Future<String> createComment(
       String repoSlug, String issueNumber, String commentText) async {
@@ -142,7 +155,13 @@ class Github {
     return json['url'] as String;
   }
 
-  // DELETE /repos/{owner}/{repo}/issues/comments/{comment_id} (status=204)
+  Future<void> deleteComment(String repoSlug, int commentId) async {
+    var org = repoSlug.split('/')[0];
+    var repo = repoSlug.split('/')[1];
+
+    await callRestApiDelete(Uri.parse(
+        'https://api.github.com/repos/$org/$repo/issues/comments/$commentId'));
+  }
 
   void close() {
     _httpClient?.close();

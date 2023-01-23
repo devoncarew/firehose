@@ -37,13 +37,17 @@ class Firehose {
         github.repoSlug!, github.issueNumber!,
         user: _githubActionsUser, searchTerm: _publishBotTag);
 
-    if (existingCommentId != null || results.hasSuccess) {
+    if (results.hasSuccess) {
       var text = '$_publishBotTag:\n\n${results.describe}';
 
       if (existingCommentId == null) {
         await github.createComment(github.repoSlug!, github.issueNumber!, text);
       } else {
         await github.updateComment(github.repoSlug!, existingCommentId, text);
+      }
+    } else {
+      if (existingCommentId != null) {
+        await github.deleteComment(github.repoSlug!, existingCommentId);
       }
     }
 
@@ -107,7 +111,7 @@ class Firehose {
           var result = Result.success(
               package,
               '${package.pubspec.version} is ready to publish; after merging, '
-              'tagging with `$repoTag` will trigger publishing');
+              'tag with `$repoTag` to trigger publishing');
           print(result);
           results.addResult(result);
         }
@@ -226,6 +230,8 @@ class VerificationResults {
   bool get hasSuccess => results.any((r) => r.severity == Severity.success);
 
   String get describe {
+    results.sort();
+
     return results.map((r) {
       var sev = r.severity == Severity.error ? '(error) ' : '';
       return '- package:${r.package.name}: $sev${r.message}';
@@ -233,7 +239,7 @@ class VerificationResults {
   }
 }
 
-class Result {
+class Result implements Comparable<Result> {
   final Severity severity;
   final Package package;
   final String message;
@@ -251,10 +257,13 @@ class Result {
 
   @override
   String toString() => message;
+
+  @override
+  int compareTo(Result other) => severity.index - other.severity.index;
 }
 
 enum Severity {
-  error,
+  success,
   info,
-  success;
+  error;
 }
