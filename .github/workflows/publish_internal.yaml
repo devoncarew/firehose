@@ -12,9 +12,11 @@ jobs:
   publish:
     if: ${{ github.repository_owner == 'devoncarew' }}
 
-    # This is required for authentication using OIDC.
+    # These permissions are required for authentication using OIDC and to enable
+    # us to create comments on PRs.
     permissions:
-      id-token: write 
+      id-token: write
+      pull-requests: write
 
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +28,9 @@ jobs:
 
       - name: Validate packages
         if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.number }}
         run: dart pub run firehose --verify
 
       - name: Publish tagged package

@@ -25,14 +25,14 @@ class Package {
 
   List<String> matchingFiles(List<String> changedFiles) {
     var fullPath = directory.absolute.path;
-    return changedFiles.where((file) => containsFile(file)).map((file) {
+    return changedFiles.where(containsFile).map((file) {
       return File(file).absolute.path.substring(fullPath.length + 1);
     }).toList();
   }
 
   @override
   String toString() {
-    return 'package:${pubspec.name}, ${pubspec.version}, ${directory.path}';
+    return 'package:${pubspec.name} ${pubspec.version} (dir=${directory.path})';
   }
 }
 
