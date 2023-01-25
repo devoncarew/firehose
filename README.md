@@ -1,6 +1,4 @@
 [![Dart](https://github.com/devoncarew/firehose/actions/workflows/dart.yaml/badge.svg)](https://github.com/devoncarew/firehose/actions/workflows/dart.yaml)
-[![pub package](https://img.shields.io/pub/v/firehose.svg)](https://pub.dev/packages/firehose)
-[![package publisher](https://img.shields.io/pub/publisher/firehose.svg)](https://pub.dev/packages/firehose/publisher)
 
 ## What's this?
 
