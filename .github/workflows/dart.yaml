@@ -21,7 +21,7 @@ jobs:
     steps:
       # These are the latest versions of the github actions; dependabot will
       # send PRs to keep these up-to-date.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
 
       - name: Install dependencies
